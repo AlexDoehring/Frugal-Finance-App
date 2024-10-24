@@ -1,0 +1,38 @@
+[
+  {
+    "amount": 50.0,
+    "category": "Food",
+    "date": "2024-10-01",
+    "description": "Groceries"
+  },
+  {
+    "amount": 1600,
+    "category": "Rent",
+    "date": "2024-10-01",
+    "description": "Monthly Rent"
+  },
+  {
+    "amount": 67.87,
+    "category": "Utilities",
+    "date": "2024-10-05",
+    "description": "Electricity bill"
+  },
+  {
+    "amount": 25.3,
+    "category": "Food",
+    "date": "2024-10-10",
+    "description": "Dinner at a restaurant"
+  },
+  {
+    "amount": 56.43,
+    "category": "Transportation",
+    "date": "2024-10-12",
+    "description": "Gas refill"
+  },
+  {
+    "amount": 30,
+    "category": "Food",
+    "date": "2024-10-15",
+    "description": "Lunch with friends"
+  }
+]
