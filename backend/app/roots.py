@@ -6,36 +6,36 @@ from datetime import datetime
 expenses_bp = Blueprint('expenses', __name__)
 
 def validate_input(data): #function to validate required fields
-    fields=['amount','category','date']
+    fields=['amount','category','date'] #3 required fileds
     for field in fields:
-        if field not in data or not data[field]:
-            return False, f'{field} is required'
-    return True, None
+        if field not in data or not data[field]: #iterate through the fields making sure data is present (does not check to see if data is VALID. eg: expecting a number)
+            return False, f'{field} is required' #return false with error message
+    return True, None #returns true with no error mesage 
 
-@expenses_bp.route('/expenses',methods=['POST'])
+@expenses_bp.route('/expenses',methods=['POST']) #route for logging expenses
 @login_required
-def add_expense():
-    data=request.get_json()
+def add_expense(): #adds an expense 
+    data=request.get_json() #get data from front end
 
-    is_valid,error_message=validate_input(data)
-    if not is_valid:
-        return jsonify({'error': error_message}), 400
+    is_valid,error_message=validate_input(data) #send data through valid function and assigns variables is_valid and error_message to the respective output from function
+    if not is_valid: #if the data is not valid
+        return jsonify({'error': error_message}), 400 #return error message with status 400 
     
     try:
-        amount=float(data['amount'])
+        amount=float(data['amount'])  #tries to parse the data from the front end
         category=data['category']
         date = datetime.strptime(data['date'], '%Y-%m-%d').date()
         description=data.get('description', None)
-
+        #creates the new expense
         new_expense=Expense(user_id=current_user.id, amount=amount, category=category, date=date, description=description)
         
-        db.session.add(new_expense)
+        db.session.add(new_expense) #adds the expense to the db
         db.session.commit()
 
-        return jsonify({'message': 'Expense Logged Successfully'}), 201
+        return jsonify({'message': 'Expense Logged Successfully'}), 201 #message signaling a successful log 
     
     except ValueError:
-        return jsonify({'error': 'Invalid data format'}), 400
+        return jsonify({'error': 'Invalid data format'}), 400 #if the parsing of the data fails, it was an invalid data type and returns error status 400 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
