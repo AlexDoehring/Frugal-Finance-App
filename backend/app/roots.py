@@ -38,6 +38,48 @@ def add_expense(): #adds an expense
         return jsonify({'error': 'Invalid data format'}), 400 #if the parsing of the data fails, it was an invalid data type and returns error status 400 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@expenses_bp.route('/expenses', methods=['GET'])
+@login_required
+def get_expenses():
+    #optional filters retrieved from front end 
+    category = request.args.get('category')  
+    start_date = request.args.get('start_date')  
+    end_date = request.args.get('end_date')  
+
+    query = Expense.query.filter_by(user_id=current_user.id) #build the base query
+
+    if category: #filters by category if specified
+        query = query.filter_by(category=category)  
+    
+    # filters by date if specified
+    if start_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            query = query.filter(Expense.date >= start_date)
+        except ValueError:
+            return jsonify({'error': 'Invalid start date format'}), 400
+    if end_date:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            query = query.filter(Expense.date <= end_date)
+        except ValueError:
+            return jsonify({'error': 'Invalid end date format'}), 400
+
+    expenses = query.all() #execute the query and fetch all results from filter
+
+    #Format the results into a list of dictionaries to be returned to front end 
+    result = [
+        {
+            'id': expense.id,
+            'amount': expense.amount,
+            'category': expense.category,
+            'date': expense.date.strftime('%Y-%m-%d'),
+            'description': expense.description
+        } for expense in expenses
+    ]
+
+    return jsonify(result), 200 #return result list 
 
 
 
