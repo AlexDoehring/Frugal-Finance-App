@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from .roots import expenses_bp
 from .auth import auth_bp
 from flask_login import LoginManager
+from .models import User 
 
 db = SQLAlchemy()
 
