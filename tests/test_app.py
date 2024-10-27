@@ -1,6 +1,6 @@
 import unittest
-from app import create_app, db
-from app.models import User, Expense
+from backend.app import create_app, db
+from backend.app.models import User, Expense
 
 class ExpenseTrackerTestCase(unittest.TestCase):
     def setUp(self):
