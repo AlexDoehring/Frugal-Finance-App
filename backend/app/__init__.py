@@ -5,6 +5,10 @@ from .routes import expenses_bp
 from .auth import auth_bp
 from flask_login import LoginManager
 from .models import db, User
+from .models import User 
+from .analysis import ExpenseAnalysis
+
+db = SQLAlchemy()
 
 login_manager = LoginManager()
 

@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from .models import db, Expense, User
 from flask_login import login_required, current_user
 from datetime import datetime 
+from .analysis import ExpenseAnalysis
 
 expenses_bp = Blueprint('expenses', __name__)
 
