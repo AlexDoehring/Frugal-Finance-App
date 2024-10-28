@@ -69,7 +69,7 @@ def get_expenses():
     if end_date:
         query = query.filter(Expense.date <= datetime.strptime(end_date, '%Y-%m-%d').date())
 
-    expenses = query.paginate(page, per_page, error_out=False)  # Pagination
+    expenses = query.paginate(page=page, per_page=per_page, error_out=False)
 
     result = [
         {
