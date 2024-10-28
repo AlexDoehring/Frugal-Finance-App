@@ -15,6 +15,7 @@ def create_app(config_class=Config):  # Change default to Config class
     app = Flask(__name__)
     app.config.from_object(config_class)
     db.init_app(app)
+    login_manager.init_app(app) # Initialize login manager
 
     # Import blueprints here to avoid circular imports
     app.register_blueprint(auth_bp)
