@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required
-from .models import User, db
+from .models import User
 from werkzeug.security import check_password_hash, generate_password_hash
+from .db import db
 
 auth_bp = Blueprint('auth', __name__)  # creates a blueprint to group authentication-related routes together
 
