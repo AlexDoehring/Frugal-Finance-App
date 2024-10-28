@@ -40,3 +40,10 @@ class Expense(db.Model):
     # Define the description column, which stores additional details about the expense with a maximum length of 200 characters
     # This field is optional and can be left blank
     description = db.Column(db.String(200), nullable=True)
+
+class Budgets(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.String(200), nullable=True)

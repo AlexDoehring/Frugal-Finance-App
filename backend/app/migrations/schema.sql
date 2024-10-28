@@ -14,3 +14,12 @@ CREATE TABLE expense (
     description VARCHAR(255) --optional
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
+
+CREATE TABLE budget (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    amount FLOAT NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    description VARCHAR(255) --optional
+    FOREIGN KEY (user_id) REFERENCES user(id)
+);
