@@ -1,3 +1,4 @@
+# backend/app/__init__.py
 from flask import Flask
 from .routes import expenses_bp
 from .auth import auth_bp
@@ -5,19 +6,18 @@ from flask_login import LoginManager
 from .models import User
 from .db import db
 from sqlalchemy import text
+from config import Config  # Ensure to import the Config class correctly
+import os
 
 login_manager = LoginManager()
 
-def create_app(config_class='backend.config'):
+def create_app(config_class=Config):  # Change default to Config class
     app = Flask(__name__)
     app.config.from_object(config_class)
     db.init_app(app)
+    login_manager.init_app(app) # Initialize login manager
 
     # Import blueprints here to avoid circular imports
-    from .auth import auth_bp  # Move this inside the function
-    from .routes import expenses_bp
-
-    # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(expenses_bp)
 
