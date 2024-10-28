@@ -1,6 +1,6 @@
 Login Post:
 {
-    "username": "markmaloney",
+    "username": "Mark Maloney",
     "email": "markmaloney@ku.edu",
     "password": "pimp"
 }

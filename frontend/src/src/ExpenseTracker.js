@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './App.css';
 
 function ExpenseTracker() {
@@ -10,34 +11,41 @@ function ExpenseTracker() {
   });
 
   useEffect(() => {
-    // Load expenses from local storage on initial render
     const storedExpenses = JSON.parse(localStorage.getItem('expenses') || '[]');
     setExpenses(storedExpenses);
   }, []);
 
   useEffect(() => {
-    // Store expenses in local storage whenever they change
     localStorage.setItem('expenses', JSON.stringify(expenses));
   }, [expenses]);
 
   const handleInputChange = (e) => {
-    // Handle changes to form input fields
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
-    // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Prepare new expense object
     const newExpense = {
-      id: Date.now(), // Generate a unique ID based on the current timestamp
-      amount: parseFloat(formData.amount), // Convert amount to a floating point number
+      amount: parseFloat(formData.amount),
       category: formData.category,
-      date: new Date().toISOString().split('T')[0], // Format the current date as YYYY-MM-DD
+      date: new Date().toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
       description: formData.description
     };
-    setExpenses([...expenses, newExpense]); // Add the new expense to the existing list
-    setFormData({ amount: '', category: '', description: '' }); // Reset the form fields
+
+    // Add new expense locally
+    setExpenses([...expenses, { id: Date.now(), ...newExpense }]); // Include a unique id for local tracking
+    setFormData({ amount: '', category: '', description: '' }); // Reset form data
+
+    // Send new expense data to the backend
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/expenses', newExpense, { withCredentials: true });
+      console.log('Expense added to backend successfully:', response.data);
+    } catch (error) {
+      console.error('Error adding expense to backend:', error.response ? error.response.data : error.message);
+    }
   };
 
   return (

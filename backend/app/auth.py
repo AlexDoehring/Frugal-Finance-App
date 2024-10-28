@@ -39,19 +39,19 @@ def register():
         return jsonify({"error": str(e)}), 500
 
 # Route for user login
-# Checks if the provided email and password match a registered user
+# Checks if the provided username and password match a registered user
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()  # Retrieve JSON data from the request
-    email = data.get('email')  # Get email from data, using .get to avoid KeyError if email is missing
+    username = data.get('username')  # Get username from data
     password = data.get('password')  # Get password from data
 
-    # Check if both email and password are provided
-    if not email or not password:
-        return jsonify({'error': 'Email and password are required'}), 400
+    # Check if both username and password are provided
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required'}), 400
 
-    # Query the database for a user with the provided email
-    user = User.query.filter_by(email=email).first()
+    # Query the database for a user with the provided username
+    user = User.query.filter_by(username=username).first()  # Query by username
 
     # If user exists and the password matches the stored hash, log them in
     if user and check_password_hash(user.password, password):
@@ -59,6 +59,8 @@ def login():
         return jsonify({'message': 'Login successful'}), 200  # Return success message
     else:
         # Return error message if credentials are invalid
+        print(username)
+        print(password)
         return jsonify({'error': 'Invalid credentials'}), 401
 
 # Route for user logout

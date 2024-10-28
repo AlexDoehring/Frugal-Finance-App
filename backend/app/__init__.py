@@ -1,29 +1,32 @@
-# backend/app/__init__.py
 from flask import Flask
+from flask_cors import CORS  # Import CORS
 from .routes import expenses_bp
 from .auth import auth_bp
 from flask_login import LoginManager
 from .models import User
 from .db import db
 from sqlalchemy import text
-from config import Config  # Ensure to import the Config class correctly
+from config import Config
 import os
 
 login_manager = LoginManager()
 
-def create_app(config_class=Config):  # Change default to Config class
+def create_app(config_class=Config): 
     app = Flask(__name__)
     app.config.from_object(config_class)
     db.init_app(app)
-    login_manager.init_app(app) # Initialize login manager
+    login_manager.init_app(app) 
 
-    # Import blueprints here to avoid circular imports
+    # Enable CORS for all routes
+    CORS(app, supports_credentials=True)
+
+    # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(expenses_bp)
 
     with app.app_context():
-        from . import models  # Import models here
-        db.create_all()  # Create database tables
+        from . import models  
+        db.create_all()  
 
     return app
 
@@ -32,13 +35,13 @@ def init_db(db, app):
     with app.app_context():
         schema_path = os.path.join(app.root_path, 'migrations/schema.sql')
         with open(schema_path) as f:
-            sql_statements = f.read().split(';')  # Split SQL statements by semicolon
+            sql_statements = f.read().split(';')  
             for statement in sql_statements:
-                if statement.strip():  # Skip empty statements
-                    db.session.execute(text(statement.strip()))  # Wrap SQL statements in text
+                if statement.strip():  
+                    db.session.execute(text(statement.strip())) 
         db.session.commit()
 
 @login_manager.user_loader
 def load_user(user_id):
-    from .models import User  # Import User model here to avoid circular import
+    from .models import User  
     return User.query.get(int(user_id))
