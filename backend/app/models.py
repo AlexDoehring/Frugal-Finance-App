@@ -41,7 +41,7 @@ class Expense(db.Model):
     # This field is optional and can be left blank
     description = db.Column(db.String(200), nullable=True)
 
-class Budgets(db.Model):
+class Budget(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     category = db.Column(db.String(50), nullable=False)
