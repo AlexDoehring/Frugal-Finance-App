@@ -7,6 +7,12 @@ from .db import db
 expenses_bp = Blueprint('expenses', __name__)
 
 def validate_input(data):
+    """
+    Validates JSON input data for creating an expense entry.
+    Preconditions: JSON data must include 'amount', 'category', and 'date'.
+    Postconditions: Returns True if data is valid, otherwise False and an error message.
+    Side Effects: None
+    """
     fields = ['amount', 'category', 'date']
     for field in fields:
         if field not in data or not data[field]:
@@ -24,7 +30,16 @@ def validate_input(data):
 
 @expenses_bp.route('/expenses', methods=['POST'])  # Route for logging expenses
 @login_required
-def add_expense():  # Adds an expense 
+   
+def add_expense():  # Adds an expense takes no parameters
+    """
+    Preconditions: User must be registered and logged in
+    Acceptable Input: Valid JSON payload with amount, category, date, optional description
+    Postconditions: Adds a new expense entry to the database.
+    Return Values: JSON success or error message.
+    Side Effects: Adds new entry to the 'expenses' table in the database.
+    Known Faults: None
+    """
     data = request.get_json()  # Get data from front end
 
     is_valid, error_message = validate_input(data)  # Validate input
@@ -52,6 +67,14 @@ def add_expense():  # Adds an expense
 @expenses_bp.route('/expenses', methods=['GET'])
 @login_required
 def get_expenses():
+    """
+    Preconditions: User must be registered and logged in
+    Acceptable Input: Optional query parameters: category, start_date, end_date, page, per_page
+    Postconditions: Returns a paginated list of expenses 
+    Return Values: JSON with total expenses, page details, and filtered list
+    Side Effects: None
+    Known Faults: None
+    """
     # Optional filters retrieved from front end 
     category = request.args.get('category')  
     start_date = request.args.get('start_date')  
@@ -71,7 +94,7 @@ def get_expenses():
 
     expenses = query.paginate(page=page, per_page=per_page, error_out=False)
 
-    result = [
+    result = [  #returns the results as a list of dictionaries
         {
             'id': expense.id,
             'amount': expense.amount,
@@ -86,4 +109,4 @@ def get_expenses():
         'pages': expenses.pages,
         'current_page': expenses.page,
         'expenses': result
-    }), 200
+    }), 200 # Success response with paginated results
