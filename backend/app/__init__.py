@@ -1,19 +1,17 @@
 import os
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from .routes import expenses_bp
 from .auth import auth_bp
 from flask_login import LoginManager
-from .models import db, User
-from .models import User 
-
-db = SQLAlchemy()
+from .models import User
+from .db import db
+from sqlalchemy import text
 
 login_manager = LoginManager()
 
-def create_app():
+def create_app(config_class='backend.config'):
     app = Flask(__name__)
-    app.config.from_object('config')
+    app.config.from_object(config_class)
     db.init_app(app)
 
     login_manager.init_app(app)
@@ -34,7 +32,10 @@ def init_db(db, app):
     with app.app_context():
         schema_path = os.path.join(app.root_path, 'migrations/schema.sql')
         with open(schema_path) as f:
-            db.session.execute(f.read())
+            sql_statements = f.read().split(';')  # Split SQL statements by semicolon
+            for statement in sql_statements:
+                if statement.strip():  # Skip empty statements
+                    db.session.execute(text(statement.strip()))  # Wrap SQL statements in text
         db.session.commit()
 
 @login_manager.user_loader

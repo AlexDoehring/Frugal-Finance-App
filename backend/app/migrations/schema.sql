@@ -11,5 +11,6 @@ CREATE TABLE expense (
     amount FLOAT NOT NULL,
     category VARCHAR(50) NOT NULL,
     date DATE NOT NULL,
+    description VARCHAR(255), -- optional
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
