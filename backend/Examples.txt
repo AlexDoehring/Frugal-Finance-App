@@ -48,3 +48,12 @@ example Expense posts:
     "date": "2024-10-15",
     "description": "Lunch with friends"
   }
+
+
+  example Budget posts:
+
+  {
+    "amount": 500,
+    "category": "Food",
+    "description": "I want to spend less than $500 a month on Food"
+  }
