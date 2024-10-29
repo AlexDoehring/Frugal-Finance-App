@@ -13,7 +13,6 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()  # Retrieve JSON data from the request
-    print(data)  # Debugging line to print received data
 
     # Check if a user with the same email or username already exists
     existing_user = User.query.filter((User.email == data['email']) | (User.username == data['username'])).first()
@@ -59,8 +58,6 @@ def login():
         return jsonify({'message': 'Login successful'}), 200  # Return success message
     else:
         # Return error message if credentials are invalid
-        print(username)
-        print(password)
         return jsonify({'error': 'Invalid credentials'}), 401
 
 # Route for user logout

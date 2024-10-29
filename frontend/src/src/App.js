@@ -23,7 +23,8 @@ function App() {
         {
           username: formData.username,
           password: formData.password
-        }
+        },
+        { withCredentials: true } // Include credentials in the login request
       );
 
       if (response.status === 200) {

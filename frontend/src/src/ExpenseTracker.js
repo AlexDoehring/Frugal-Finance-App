@@ -11,13 +11,18 @@ function ExpenseTracker() {
   });
 
   useEffect(() => {
-    const storedExpenses = JSON.parse(localStorage.getItem('expenses') || '[]');
-    setExpenses(storedExpenses);
-  }, []);
+    const fetchExpenses = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/expenses', { withCredentials: true });
+        // Set expenses from response data
+        setExpenses(response.data.expenses);
+      } catch (error) {
+        console.error('Error fetching expenses:', error.response ? error.response.data : error.message);
+      }
+    };
 
-  useEffect(() => {
-    localStorage.setItem('expenses', JSON.stringify(expenses));
-  }, [expenses]);
+    fetchExpenses();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -35,16 +40,19 @@ function ExpenseTracker() {
       description: formData.description
     };
 
-    // Add new expense locally
-    setExpenses([...expenses, { id: Date.now(), ...newExpense }]); // Include a unique id for local tracking
+    // Optimistically update local expenses list
+    setExpenses(prevExpenses => [...prevExpenses, { id: Date.now(), ...newExpense }]);
     setFormData({ amount: '', category: '', description: '' }); // Reset form data
 
     // Send new expense data to the backend
     try {
       const response = await axios.post('http://127.0.0.1:5000/expenses', newExpense, { withCredentials: true });
       console.log('Expense added to backend successfully:', response.data);
+      // Optionally, you might want to refresh the expense list or update the state with the response
     } catch (error) {
       console.error('Error adding expense to backend:', error.response ? error.response.data : error.message);
+      // Optionally revert optimistic update if POST fails
+      setExpenses(prevExpenses => prevExpenses.filter(expense => expense.id !== Date.now()));
     }
   };
 
