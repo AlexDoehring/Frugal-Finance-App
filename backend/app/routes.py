@@ -1,10 +1,11 @@
 from flask import Blueprint, request, jsonify
-from .models import Expense, User
+from .models import Expense, User, Budget
 from flask_login import login_required, current_user
 from datetime import datetime
 from .db import db
 
 expenses_bp = Blueprint('expenses', __name__)
+budget_bp = Blueprint('budget', __name__)
 
 def validate_input(data):
     """
@@ -110,3 +111,87 @@ def get_expenses():
         'current_page': expenses.page,
         'expenses': result
     }), 200 # Success response with paginated results
+
+def validate_budget_input(data):
+    """
+    Validates JSON input data for creating a budget goal.
+    Preconditions: JSON data must include 'amount' and 'category'.
+    Postconditions: Returns True if data is valid, otherwise False and an error message.
+    """
+    if 'amount' not in data or not data['amount']:
+        return False, 'Amount is required'
+    if 'category' not in data or not data['category']:
+        return False, 'Category is required'
+
+    try:
+        amount = float(data['amount'])
+        if amount <= 0:
+            return False, 'Amount must be a positive number'
+    except ValueError:
+        return False, 'Amount must be a valid number'
+
+    return True, None
+
+@budget_bp.route('/budget', methods=['POST'])
+@login_required
+def add_budget_goal():
+    """
+    Preconditions: User must be registered and logged in
+    Acceptable Input: Valid JSON payload with amount, category, optional description
+    Postconditions: Adds a new budget goal entry to the database.
+    """
+    data = request.get_json()
+    is_valid, error_message = validate_budget_input(data)
+    if not is_valid:
+        return jsonify({'error': error_message}), 400
+
+    try:
+        amount = float(data['amount'])
+        category = data['category']
+        description = data.get('description', None)
+
+        new_budget = Budget(user_id=current_user.id, amount=amount, category=category, description=description)
+
+        db.session.add(new_budget)
+        db.session.commit()
+
+        return jsonify({'message': 'Budget goal created successfully'}), 201
+
+    except ValueError:
+        return jsonify({'error': 'Invalid data format'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@budget_bp.route('/budget', methods=['GET'])
+@login_required
+def get_budget_goals():
+    """
+    Preconditions: User must be registered and logged in
+    Acceptable Input: Optional query parameters: category, page, per_page
+    Postconditions: Returns a paginated list of budget goals for the current user.
+    """
+    category = request.args.get('category')
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+
+    query = Budget.query.filter_by(user_id=current_user.id)
+    if category:
+        query = query.filter(Budget.category == category)
+
+    budgets = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    result = [
+        {
+            'id': budget.id,
+            'amount': budget.amount,
+            'category': budget.category,
+            'description': budget.description
+        } for budget in budgets.items
+    ]
+
+    return jsonify({
+        'total': budgets.total,
+        'pages': budgets.pages,
+        'current_page': budgets.page,
+        'budgets': result
+    }), 200
