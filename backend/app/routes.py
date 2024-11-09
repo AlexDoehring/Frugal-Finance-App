@@ -113,6 +113,65 @@ def get_expenses():
         'expenses': result
     }), 200 # Success response with paginated results
 
+@expenses_bp.route('/expenses/<int:expense_id>', methods=['PUT'])
+@login_required
+def edit_expense(expense_id):
+    """
+    Preconditions: User must be registered and logged in.
+    Acceptable Input: Valid JSON payload with optional amount, category, date, description fields.
+    Postconditions: Updates the specified expense entry in the database.
+    """
+    data = request.get_json()
+    
+    # Find the expense by ID and ensure it belongs to the current user
+    expense = Expense.query.filter_by(id=expense_id, user_id=current_user.id).first()
+    if not expense:
+        return jsonify({'error': 'Expense not found or access unauthorized'}), 404
+
+    # Validate input fields if they are provided in the data
+    if 'amount' in data:
+        try:
+            expense.amount = float(data['amount'])
+            if expense.amount <= 0:
+                return jsonify({'error': 'Amount must be a positive number'}), 400
+        except ValueError:
+            return jsonify({'error': 'Amount must be a valid number'}), 400
+
+    if 'category' in data:
+        expense.category = data['category']
+    
+    if 'date' in data:
+        try:
+            expense.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({'error': 'Date must be in YYYY-MM-DD format'}), 400
+    
+    if 'description' in data:
+        expense.description = data['description']
+
+    # Commit the changes to the database
+    db.session.commit()
+    return jsonify({'message': 'Expense updated successfully'}), 200
+
+@expenses_bp.route('/expenses/<int:expense_id>', methods=['DELETE'])
+@login_required
+def delete_expense(expense_id):
+    """
+    Preconditions: User must be registered and logged in.
+    Acceptable Input: Expense ID as URL parameter.
+    Postconditions: Deletes the specified expense from the database.
+    """
+    # Find the expense by ID and ensure it belongs to the current user
+    expense = Expense.query.filter_by(id=expense_id, user_id=current_user.id).first()
+    if not expense:
+        return jsonify({'error': 'Expense not found or access unauthorized'}), 404
+
+    # Delete the expense from the database
+    db.session.delete(expense)
+    db.session.commit()
+    return jsonify({'message': 'Expense deleted successfully'}), 200
+
+#BUDGET
 def validate_budget_input(data):
     """
     Validates JSON input data for creating a budget goal.
