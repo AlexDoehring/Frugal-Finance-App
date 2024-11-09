@@ -23,3 +23,13 @@ CREATE TABLE budget (
     description VARCHAR(255) --optional
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
+
+CREATE TABLE income (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    source_name VARCHAR(100) NOT NULL,
+    amount FLOAT NOT NULL,
+    frequency VARCHAR(50) NOT NULL, -- e.g., "monthly", "weekly", "one-time"
+    description VARCHAR(255), -- optional
+    FOREIGN KEY (user_id) REFERENCES user(id)
+);

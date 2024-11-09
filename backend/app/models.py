@@ -47,3 +47,11 @@ class Budget(db.Model):
     category = db.Column(db.String(50), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     description = db.Column(db.String(200), nullable=True)
+
+class Income(db.Model):
+    id = db.Column(db.Integer, primary_key=True)                                        #Primary key for the Income table
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)           #Foreign key to associate the income entry with a specific user
+    source_name = db.Column(db.String(100), nullable=False)                             #Source name for the income, max length of 100 characters
+    amount = db.Column(db.Float, nullable=False)                                        #Amount of income from this source, stored as a float and cannot be null
+    frequency = db.Column(db.String(50), nullable=False)                                #Frequency of income, e.g., 'monthly', 'weekly', 'one-time', max length of 50 characters
+    description = db.Column(db.String(200), nullable=True)                              #Optional description for additional details about the income source, max length of 200 characters

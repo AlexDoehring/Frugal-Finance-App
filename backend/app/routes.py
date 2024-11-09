@@ -1,11 +1,12 @@
 from flask import Blueprint, request, jsonify
-from .models import Expense, User, Budget
+from .models import Expense, User, Budget, Income
 from flask_login import login_required, current_user
 from datetime import datetime
 from .db import db
 
 expenses_bp = Blueprint('expenses', __name__)
 budget_bp = Blueprint('budget', __name__)
+income_bp = Blueprint('income', __name__)
 
 def validate_input(data):
     """
@@ -194,4 +195,94 @@ def get_budget_goals():
         'pages': budgets.pages,
         'current_page': budgets.page,
         'budgets': result
+    }), 200
+
+def validate_income_input(data): #Function to validate the input of data to the income table
+    """
+    Validates JSON input data for creating an income entry.
+    Preconditions: JSON data must include 'amount', 'source_name', and 'frequency'.
+    Postconditions: Returns True if data is valid, otherwise False and an error message.
+    """
+    fields = ['amount', 'source_name', 'frequency'] 
+    for field in fields:
+        if field not in data or not data[field]: # Check to make sure each field is filled 
+            return False, f'{field} is required'
+
+    try:
+        amount = float(data['amount']) #Try to cast input to a float 
+        if amount <= 0:
+            return False, 'Amount must be a positive number'
+    except ValueError:
+        return False, 'Amount must be a valid number'
+
+    return True, None #If valid, return True with no error message 
+
+@income_bp.route('/income', methods=['POST'])
+@login_required    
+def add_income():
+    """
+    Preconditions: User must be registered and logged in.
+    Acceptable Input: Valid JSON payload with amount, source_name, frequency, optional description.
+    Postconditions: Adds a new income entry to the database.
+    """
+    data = request.get_json()
+    is_valid, error_message = validate_income_input(data)  #Sends retrieved data to validate input function
+    if not is_valid:
+        return jsonify({'error': error_message}), 400 #retrun respective error message if input was not valid 
+
+    try: #create an instance of the income class with the input data and adds to to the database 
+        amount = float(data['amount'])
+        source_name = data['source_name']
+        frequency = data['frequency']
+        description = data.get('description', None)
+
+        new_income = Income(user_id=current_user.id, amount=amount, source_name=source_name, frequency=frequency, description=description)
+
+        db.session.add(new_income)
+        db.session.commit()
+
+        return jsonify({'message': 'Income source logged successfully'}), 201
+
+    except ValueError:
+        return jsonify({'error': 'Invalid data format'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@income_bp.route('/income', methods=['GET'])
+@login_required
+def get_income(): #route
+    """
+    Preconditions: User must be registered and logged in.
+    Acceptable Input: Optional query parameters: source_name, frequency, page, per_page.
+    Postconditions: Returns a paginated list of income sources for the current user.
+    """
+    source_name = request.args.get('source_name')
+    frequency = request.args.get('frequency')
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+
+    query = Income.query.filter_by(user_id=current_user.id) #allows a user to query by source name and or frequency 
+    if source_name:
+        query = query.filter(Income.source_name == source_name)
+    if frequency:
+        query = query.filter(Income.frequency == frequency)
+
+    incomes = query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    #returns the results as a list of dictionaries
+    result = [ 
+        {
+            'id': income.id,
+            'source_name': income.source_name,
+            'amount': income.amount,
+            'frequency': income.frequency,
+            'description': income.description
+        } for income in incomes.items
+    ]
+    # Success response with paginated results
+    return jsonify({
+        'total': incomes.total,
+        'pages': incomes.pages,
+        'current_page': incomes.page,
+        'incomes': result
     }), 200
