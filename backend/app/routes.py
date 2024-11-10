@@ -3,10 +3,110 @@ from .models import Expense, User, Budget, Income
 from flask_login import login_required, current_user
 from datetime import datetime
 from .db import db
+from io import StringIO, BytesIO
+import csv
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 
 expenses_bp = Blueprint('expenses', __name__)
 budget_bp = Blueprint('budget', __name__)
 income_bp = Blueprint('income', __name__)
+export_bp = Blueprint('export', __name__)
+
+
+
+@export_bp.route('/export_csv', methods=['GET'])
+@login_required
+def export_csv():
+    # Query the data
+    expenses = Expense.query.filter_by(user_id=current_user.id).all()
+    incomes = Income.query.filter_by(user_id=current_user.id).all()
+    budgets = Budget.query.filter_by(user_id=current_user.id).all()
+    
+    # Create a CSV file in memory
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Write headers
+    writer.writerow(['Type', 'ID', 'Amount', 'Category', 'Description', 'Date/Source/Frequency'])
+    
+    # Write expenses
+    for expense in expenses:
+        writer.writerow(['Expense', expense.id, expense.amount, expense.category, expense.description, expense.date])
+    
+    # Write incomes
+    for income in incomes:
+        writer.writerow(['Income', income.id, income.amount, income.source_name, income.description, income.frequency])
+    
+    # Write budgets
+    for budget in budgets:
+        writer.writerow(['Budget', budget.id, budget.amount, budget.category, budget.description, ''])
+    
+    # Move the cursor to the beginning of the StringIO object
+    output.seek(0)
+    
+    # Return the CSV file as a response
+    return output.getvalue(), 200, {'Content-Type': 'text/csv', 'Content-Disposition': 'attachment; filename=export.csv'}
+
+@export_bp.route('/export_pdf', methods=['GET'])
+@login_required
+def export_pdf():
+    # Query the data
+    expenses = Expense.query.filter_by(user_id=current_user.id).all()
+    incomes = Income.query.filter_by(user_id=current_user.id).all()
+    budgets = Budget.query.filter_by(user_id=current_user.id).all()
+    
+    # Create a CSV file in memory
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Write headers
+    writer.writerow(['Type', 'ID', 'Amount', 'Category', 'Description', 'Date/Source/Frequency'])
+    
+    # Write expenses
+    for expense in expenses:
+        writer.writerow(['Expense', expense.id, expense.amount, expense.category, expense.description, expense.date])
+    
+    # Write incomes
+    for income in incomes:
+        writer.writerow(['Income', income.id, income.amount, income.source_name, income.description, income.frequency])
+    
+    # Write budgets
+    for budget in budgets:
+        writer.writerow(['Budget', budget.id, budget.amount, budget.category, budget.description, ''])
+    
+    # Move the cursor to the beginning of the StringIO object
+    output.seek(0)
+    
+    # Read the CSV data
+    csv_data = list(csv.reader(output))
+    
+    # Create a PDF in memory
+    pdf_output = BytesIO()
+    pdf = SimpleDocTemplate(pdf_output, pagesize=letter)
+    
+    # Create a table with the CSV data
+    table = Table(csv_data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Header row background
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),  # Data rows background
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    # Build the PDF
+    pdf.build([table])
+    
+    # Get the PDF data and set the response headers
+    pdf_output.seek(0)
+    
+    return pdf_output.getvalue(), 200, {'Content-Type': 'application/pdf', 'Content-Disposition': 'attachment; filename=export.pdf'}
+    
 
 def validate_input(data):
     """
