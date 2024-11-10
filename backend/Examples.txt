@@ -6,7 +6,7 @@ Login Post:
 }
 
 {
-    "username": "alexdoehring",
+    "username": "Alex Doehring",
     "email": "alex.doehring2@gmail.com",
     "password": "kyleishot"
 }
@@ -57,3 +57,24 @@ example Expense posts:
     "category": "Food",
     "description": "I want to spend less than $500 a month on Food"
   }
+
+
+example income posts
+{
+  "amount": 3000,
+  "source_name": "Job Salary",
+  "frequency": "monthly",
+  "description": "Monthly salary from main job"
+},
+{
+  "amount": 200,
+  "source_name": "Freelance Work",
+  "frequency": "one-time",
+  "description": "Payment for freelance project"
+},
+{
+  "amount": 150,
+  "source_name": "Investment",
+  "frequency": "monthly",
+  "description": "Monthly returns from investments"
+}

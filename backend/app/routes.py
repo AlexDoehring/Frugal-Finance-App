@@ -345,3 +345,59 @@ def get_income(): #route
         'current_page': incomes.page,
         'incomes': result
     }), 200
+
+
+@income_bp.route('/income/<int:income_id>', methods=['PUT'])
+@login_required
+def edit_income(income_id):
+    """
+    Preconditions: User must be registered and logged in.
+    Acceptable Input: Valid JSON payload with optional amount, source_name, frequency, description fields.
+    Postconditions: Updates the specified income entry in the database.
+    """
+    data = request.get_json()
+    
+    # Find the income by ID and ensure it belongs to the current user
+    income = Income.query.filter_by(id=income_id, user_id=current_user.id).first()
+    if not income:
+        return jsonify({'error': 'Income not found or access unauthorized'}), 404
+
+    # Validate input fields if they are provided in the data
+    if 'amount' in data:
+        try:
+            income.amount = float(data['amount'])
+            if income.amount <= 0:
+                return jsonify({'error': 'Amount must be a positive number'}), 400
+        except ValueError:
+            return jsonify({'error': 'Amount must be a valid number'}), 400
+
+    if 'source_name' in data:
+        income.source_name = data['source_name']
+    
+    if 'frequency' in data:
+        income.frequency = data['frequency']
+    
+    if 'description' in data:
+        income.description = data['description']
+
+    # Commit the changes to the database
+    db.session.commit()
+    return jsonify({'message': 'Income updated successfully'}), 200
+
+@income_bp.route('/income/<int:income_id>', methods=['DELETE'])
+@login_required
+def delete_income(income_id):
+    """
+    Preconditions: User must be registered and logged in.
+    Acceptable Input: Income ID as URL parameter.
+    Postconditions: Deletes the specified income from the database.
+    """
+    # Find the income by ID and ensure it belongs to the current user
+    income = Income.query.filter_by(id=income_id, user_id=current_user.id).first()
+    if not income:
+        return jsonify({'error': 'Income not found or access unauthorized'}), 404
+
+    # Delete the income from the database
+    db.session.delete(income)
+    db.session.commit()
+    return jsonify({'message': 'Income deleted successfully'}), 200

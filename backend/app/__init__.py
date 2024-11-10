@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS  # Import CORS
-from .routes import expenses_bp, budget_bp
+from .routes import expenses_bp, budget_bp, income_bp
 from .auth import auth_bp
 from flask_login import LoginManager
 from .models import User, Expense, Budget
@@ -24,6 +24,7 @@ def create_app(config_class=Config):
     app.register_blueprint(auth_bp)
     app.register_blueprint(expenses_bp)
     app.register_blueprint(budget_bp)
+    app.register_blueprint(income_bp)
 
     with app.app_context():
         from . import models  
