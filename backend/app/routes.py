@@ -256,6 +256,59 @@ def get_budget_goals():
         'budgets': result
     }), 200
 
+@budget_bp.route('/budget/<int:budget_id>', methods=['PUT'])
+@login_required
+def edit_budget(budget_id):
+    """
+    Preconditions: User must be registered and logged in.
+    Acceptable Input: Valid JSON payload with optional amount, category, description fields.
+    Postconditions: Updates the specified budget entry in the database.
+    """
+    data = request.get_json()
+    
+    # Find the budget by ID and ensure it belongs to the current user
+    budget = Budget.query.filter_by(id=budget_id, user_id=current_user.id).first()
+    if not budget:
+        return jsonify({'error': 'Budget not found or access unauthorized'}), 404
+
+    # Validate input fields if they are provided in the data
+    if 'amount' in data:
+        try:
+            budget.amount = float(data['amount'])
+            if budget.amount <= 0:
+                return jsonify({'error': 'Amount must be a positive number'}), 400
+        except ValueError:
+            return jsonify({'error': 'Amount must be a valid number'}), 400
+
+    if 'category' in data:
+        budget.category = data['category']
+    
+    if 'description' in data:
+        budget.description = data['description']
+
+    # Commit the changes to the database
+    db.session.commit()
+    return jsonify({'message': 'Budget updated successfully'}), 200
+
+@budget_bp.route('/budget/<int:budget_id>', methods=['DELETE'])
+@login_required
+def delete_budget(budget_id):
+    """
+    Preconditions: User must be registered and logged in.
+    Acceptable Input: Budget ID as URL parameter.
+    Postconditions: Deletes the specified budget from the database.
+    """
+    # Find the budget by ID and ensure it belongs to the current user
+    budget = Budget.query.filter_by(id=budget_id, user_id=current_user.id).first()
+    if not budget:
+        return jsonify({'error': 'Budget not found or access unauthorized'}), 404
+
+    # Delete the budget from the database
+    db.session.delete(budget)
+    db.session.commit()
+    return jsonify({'message': 'Budget deleted successfully'}), 200
+
+
 def validate_income_input(data): #Function to validate the input of data to the income table
     """
     Validates JSON input data for creating an income entry.
