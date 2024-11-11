@@ -1,3 +1,4 @@
+/* BODY SECTION */
 body {
   /* Set the global font style and body dimensions */
   font-family: Arial, sans-serif; /* Use Arial for a clean and modern look */
@@ -6,7 +7,11 @@ body {
   padding: 0 20px; /* Add horizontal padding to the body */
   background-color: #E9EED9; /* Light earth-tone background color */
 }
+/* END BODY SECTION*/
 
+
+
+/* EXPENSE FORM SECTION */
 .expense-form {
   /* Styling for the form container */
   background: #CBD2A4; /* Light green background to match the earth-tone palette */
@@ -90,3 +95,41 @@ button:hover {
   /* Styling for the date text in each expense item */
   color: #54473F; /* Dark brown color for readability */
 }
+/* EXPENSE FORM SECTION */
+
+
+
+
+/* INCOME FORM SECTION*/
+.expense-tracker {
+  max-width: 800px;    /* Increase the maximum width */
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.view-switch {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.view-switch button {
+  margin: 0 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.view-switch .active {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.expense-form, .expense-list {
+  margin-bottom: 30px;
+}
+
+.expense-item {
+  border-bottom: 1px solid #ccc;
+  padding: 10px 0;
+}
+/* END INCOME FORM SECTION*/

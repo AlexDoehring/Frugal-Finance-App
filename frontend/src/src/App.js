@@ -1,20 +1,51 @@
+// Import React and necessary modules
 import React, { useState } from 'react';
 import axios from 'axios';
 import ExpenseTracker from './ExpenseTracker';
 import './App.css';
 
+/**
+ * App Component
+ * 
+ * This component manages the login functionality and, upon successful login, 
+ * renders the `ExpenseTracker` component for tracking expenses.
+ * 
+ * State:
+ * - `formData`: Holds the login form input values (username and password).
+ * - `isLoggedIn`: Boolean to track the user's login status.
+ * 
+ * Functions:
+ * - `handleInputChange`: Updates `formData` state with user input for login form fields.
+ * - `handleSubmit`: Sends login credentials to the backend for authentication and sets 
+ *    login status upon successful authentication.
+ */
+
 function App() {
+  // State to manage form data and login status
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
 
+  /**
+   * handleInputChange
+   * Updates the `formData` state with the user input.
+   * 
+   * @param {Object} e - The event object from the input change
+   */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  /**
+   * handleSubmit
+   * Handles form submission for login. Sends a POST request to the backend API with the 
+   * login credentials. If successful, sets `isLoggedIn` to true.
+   * 
+   * @param {Object} e - The event object from the form submission
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -39,6 +70,12 @@ function App() {
     }
   };
 
+  /**
+   * Render
+   * - If the user is logged in (`isLoggedIn` is true), the `ExpenseTracker` component 
+   *   is rendered for managing expenses.
+   * - If the user is not logged in, the login form is displayed.
+   */
   return (
     <div className="App" style={{ fontFamily: 'Arial, sans-serif', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#E9EED9' }}>
       {isLoggedIn ? (

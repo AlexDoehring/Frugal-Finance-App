@@ -1,65 +1,105 @@
+// Import React components
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
+// ExpenseTracker Component
 function ExpenseTracker() {
-  const [expenses, setExpenses] = useState([]);
-  const [formData, setFormData] = useState({
+  const [expenses, setExpenses] = useState([]);       // Store array of expense objects from backend
+  const [income, setIncome] = useState([]);           // Store array of income objects from backend
+  const [view, setView] = useState('expenses');       // Track whether to show 'expenses' or 'income'
+  const [formData, setFormData] = useState({          // Track input values in the form
     amount: '',
     category: '',
     description: ''
   });
 
+  // Fetch expenses or income based on current view
   useEffect(() => {
-    const fetchExpenses = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/expenses', { withCredentials: true });
-        // Set expenses from response data
-        setExpenses(response.data.expenses);
+        const endpoint = view === 'expenses' ? 'expenses' : 'income';
+        const response = await axios.get(`http://127.0.0.1:5000/${endpoint}`, { withCredentials: true });
+        if (view === 'expenses') {
+          setExpenses(response.data[endpoint]);
+        } else {
+          setIncome(response.data[endpoint]);
+        }
       } catch (error) {
-        console.error('Error fetching expenses:', error.response ? error.response.data : error.message);
+        console.error(`Error fetching ${view}:`, error.response ? error.response.data : error.message);
       }
     };
 
-    fetchExpenses();
-  }, []);
+    fetchData();
+  }, [view]); // Re-run effect when 'view' changes
 
+  // Handles change in input fields
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  // Handles form submission to add a new expense or income
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prepare new expense object
-    const newExpense = {
+    // Prepare new entry object
+    const newEntry = {
       amount: parseFloat(formData.amount),
       category: formData.category,
       date: new Date().toISOString().split('T')[0], // Format to 'YYYY-MM-DD'
       description: formData.description
     };
 
-    // Optimistically update local expenses list
-    setExpenses(prevExpenses => [...prevExpenses, { id: Date.now(), ...newExpense }]);
+    // Optimistically update local list
+    if (view === 'expenses') {
+      setExpenses(prevExpenses => [...prevExpenses, { id: Date.now(), ...newEntry }]);
+    } else {
+      setIncome(prevIncome => [...prevIncome, { id: Date.now(), ...newEntry }]);
+    }
     setFormData({ amount: '', category: '', description: '' }); // Reset form data
 
-    // Send new expense data to the backend
+    // Send new data to the backend
     try {
-      const response = await axios.post('http://127.0.0.1:5000/expenses', newExpense, { withCredentials: true });
-      console.log('Expense added to backend successfully:', response.data);
-      // Optionally, you might want to refresh the expense list or update the state with the response
+      const endpoint = view === 'expenses' ? 'expenses' : 'income';
+      const response = await axios.post(`http://127.0.0.1:5000/${endpoint}`, newEntry, { withCredentials: true });
+      console.log(`${view.charAt(0).toUpperCase() + view.slice(1)} added to backend successfully:`, response.data);
+      // Optionally refresh the list or update state with response data
     } catch (error) {
-      console.error('Error adding expense to backend:', error.response ? error.response.data : error.message);
+      console.error(`Error adding ${view} to backend:`, error.response ? error.response.data : error.message);
       // Optionally revert optimistic update if POST fails
-      setExpenses(prevExpenses => prevExpenses.filter(expense => expense.id !== Date.now()));
+      if (view === 'expenses') {
+        setExpenses(prevExpenses => prevExpenses.filter(entry => entry.id !== newEntry.id));
+      } else {
+        setIncome(prevIncome => prevIncome.filter(entry => entry.id !== newEntry.id));
+      }
     }
+  };
+
+  // Handle view switch between expenses and income
+  const handleViewSwitch = (newView) => {
+    setView(newView);
   };
 
   return (
     <div className="expense-tracker">
+      <div className="view-switch">
+        <button
+          className={view === 'expenses' ? 'active' : ''}
+          onClick={() => handleViewSwitch('expenses')}
+        >
+          Expenses
+        </button>
+        <button
+          className={view === 'income' ? 'active' : ''}
+          onClick={() => handleViewSwitch('income')}
+        >
+          Income
+        </button>
+      </div>
+
       <div className="expense-form">
-        <h2>Add New Expense</h2>
+        <h2>Add New {view === 'expenses' ? 'Expense' : 'Income'}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="amount">Amount ($)</label>
@@ -84,11 +124,23 @@ function ExpenseTracker() {
               required
             >
               <option value="">Select a category</option>
-              <option value="food">Food</option>
-              <option value="transportation">Transportation</option>
-              <option value="utilities">Utilities</option>
-              <option value="entertainment">Entertainment</option>
-              <option value="other">Other</option>
+              {view === 'expenses' ? (
+                <>
+                  <option value="food">Food</option>
+                  <option value="transportation">Transportation</option>
+                  <option value="utilities">Utilities</option>
+                  <option value="entertainment">Entertainment</option>
+                  <option value="other">Other</option>
+                </>
+              ) : (
+                <>
+                  <option value="salary">Salary</option>
+                  <option value="freelance">Freelance</option>
+                  <option value="investments">Investments</option>
+                  <option value="gifts">Gifts</option>
+                  <option value="other">Other</option>
+                </>
+              )}
             </select>
           </div>
 
@@ -104,17 +156,17 @@ function ExpenseTracker() {
             />
           </div>
 
-          <button type="submit">Add Expense</button>
+          <button type="submit">Add {view === 'expenses' ? 'Expense' : 'Income'}</button>
         </form>
       </div>
 
       <div className="expense-list">
-        <h3>Recent Expenses</h3>
-        {expenses.map(expense => (
-          <div key={expense.id} className="expense-item">
-            <strong>${expense.amount.toFixed(2)}</strong> - {expense.category} <br />
-            {expense.description} <br />
-            <small>{new Date(expense.date).toLocaleDateString()}</small>
+        <h3>Recent {view === 'expenses' ? 'Expenses' : 'Income'}</h3>
+        {(view === 'expenses' ? expenses : income).map(entry => (
+          <div key={entry.id} className="expense-item">
+            <strong>${entry.amount.toFixed(2)}</strong> - {entry.category} <br />
+            {entry.description} <br />
+            <small>{new Date(entry.date).toLocaleDateString()}</small>
           </div>
         ))}
       </div>
