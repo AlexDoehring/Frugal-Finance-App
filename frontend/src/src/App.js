@@ -27,6 +27,7 @@ function App() {
     password: ''
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
+  const [registerMode, setRegisterMode] = useState(false);
 
   /**
    * handleInputChange
@@ -48,6 +49,18 @@ function App() {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (registerMode) {
+      const response = await axios.post(
+        'http://127.0.0.1:5000/register',
+        {
+          username: formData.username,
+          password: formData.password
+        },
+        { withCredentials: true } // Include credentials in the login request
+      );
+    }
+
     try {
       const response = await axios.post(
         'http://127.0.0.1:5000/login',
@@ -112,6 +125,10 @@ function App() {
             </div>
 
             <button type="submit" style={{ backgroundColor: '#54473F', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '16px' }}>Login</button>
+            <div>
+            <label for="register">register</label><br></br>
+            <input type="checkbox" id="register" onChange={() => setRegisterMode(!registerMode)}/>
+            </div>
           </form>
         </div>
       )}
