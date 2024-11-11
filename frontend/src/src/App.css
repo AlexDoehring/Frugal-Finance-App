@@ -95,7 +95,41 @@ button:hover {
   /* Styling for the date text in each expense item */
   color: #54473F; /* Dark brown color for readability */
 }
-/* EXPENSE FORM SECTION */
+
+.ctx-menu-holder {
+  float: right;
+  display: flex;
+  width: 15%;
+  flex-direction: column;
+  align-items: end;
+}
+
+.ctx-menu-btn {
+  font-size: medium;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ctx-menu-items {
+  display:inline;
+}
+
+.ctx-menu-item {
+  user-select: none;
+  cursor: pointer;
+  text-align: center;
+  padding: 5%;
+  background-color: #E9EED9;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+
+}
+
+.ctx-menu-item:hover {
+  background-color: #9A7E6F;
+}/* EXPENSE FORM SECTION */
 
 
 
