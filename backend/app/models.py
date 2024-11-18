@@ -46,6 +46,7 @@ class Budget(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     category = db.Column(db.String(50), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    threshold = db.Column(db.Float, nullable=False)
     description = db.Column(db.String(200), nullable=True)
 
 class Income(db.Model):

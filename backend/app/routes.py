@@ -153,18 +153,37 @@ def add_expense():  # Adds an expense takes no parameters
         category = data['category']
         date = datetime.strptime(data['date'], '%Y-%m-%d').date()
         description = data.get('description', None)
+        
+        # Calculate total expenses for the category
+        total_expenses = db.session.query(db.func.sum(Expense.amount)).filter_by(user_id=current_user.id, category=category).scalar() or 0
+        total_expenses += amount
+        
+        # Get the budget for the category
+        budget = Budget.query.filter_by(user_id=current_user.id, category=category).first()
+        
+        
         # Creates the new expense
         new_expense = Expense(user_id=current_user.id, amount=amount, category=category, date=date, description=description)
         
         db.session.add(new_expense)  # Add the expense to the db
         db.session.commit()
 
+        # Check if the total expenses exceed the budget threshold
+        if budget and total_expenses > budget.amount:
+            # Message signaling a successful log with a warning
+            return jsonify({'message': 'Warning: this expense exceeds your budget for this category'}), 201  
+        # Check if total expenses are approaching the budget threshold
+        if budget and budget.amount - total_expenses <= budget.threshold:
+            # Message signaling a successful log with a warning
+            return jsonify({'message': 'Warning: you are approaching your budget for this category'}), 201
         return jsonify({'message': 'Expense logged successfully'}), 201  # Message signaling a successful log 
     
     except ValueError:
         return jsonify({'error': 'Invalid data format'}), 400  # Invalid data type
     except Exception as e:
         return jsonify({'error': str(e)}), 500  # Other exceptions
+    
+    
 
 @expenses_bp.route('/expenses', methods=['GET'])
 @login_required
