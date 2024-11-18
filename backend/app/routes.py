@@ -326,10 +326,11 @@ def add_budget_goal():
 
     try:
         amount = float(data['amount'])
+        threshold = float(data['threshold'])
         category = data['category']
         description = data.get('description', None)
 
-        new_budget = Budget(user_id=current_user.id, amount=amount, category=category, description=description)
+        new_budget = Budget(user_id=current_user.id, amount=amount, threshold=threshold, category=category, description=description)
 
         db.session.add(new_budget)
         db.session.commit()
@@ -363,6 +364,7 @@ def get_budget_goals():
         {
             'id': budget.id,
             'amount': budget.amount,
+            'threshold' : budget.threshold,
             'category': budget.category,
             'description': budget.description
         } for budget in budgets.items
@@ -398,6 +400,14 @@ def edit_budget(budget_id):
                 return jsonify({'error': 'Amount must be a positive number'}), 400
         except ValueError:
             return jsonify({'error': 'Amount must be a valid number'}), 400
+        
+    if 'threshold' in data:
+        try:
+            budget.threshold = float(data['threshold'])
+            if budget.threshold <= 0:
+                return jsonify({'error': 'Threshold must be a positive number'}), 400
+        except ValueError:
+            return jsonify({'error': 'Threshold must be a valid number'}), 400
 
     if 'category' in data:
         budget.category = data['category']
