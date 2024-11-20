@@ -1,4 +1,9 @@
-// frontend/src/pages/Main.jsx
+/*
+Author: Drew Meyer
+Date: Nov 20, 2024
+File: Main.jsx
+Purpose: Serves as the primary dashboard or landing page after a user successfully logs in.
+*/
 
 import React from "react";
 

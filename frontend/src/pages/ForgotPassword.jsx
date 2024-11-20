@@ -1,4 +1,10 @@
-// frontend/pages/ForgotPassword.jsx
+/*
+Author: Drew Meyer
+Date: Nov 20, 2024
+File: ForgotPassword.jsx
+Purpose: Displays a page for users to recover or reset their password (functionality to be added later).
+*/
+
 
 import React from "react";
 

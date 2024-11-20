@@ -1,4 +1,9 @@
-// frontend/src/App.jsx
+/*
+Author: Drew Meyer
+Date: Nov 20, 2024
+File: App.jsx
+Purpose: Defines the main routing structure of the application, connecting each page.
+*/
 
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";

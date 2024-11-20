@@ -1,4 +1,9 @@
-// frontend/src/pages/Login.jsx
+/*
+Author: Drew Meyer
+Date: Nov 20, 2024
+File: Login.jsx
+Purpose: Handles user login functionality, including sending credentials to the backend and navigating to the Main page upon success.
+*/
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";

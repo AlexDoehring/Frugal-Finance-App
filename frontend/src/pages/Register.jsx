@@ -1,4 +1,9 @@
-// frontend/src/pages/Register.jsx
+/*
+Author: Drew Meyer
+Date: Nov 20, 2024
+File: Register.jsx
+Purpose: Provides a page for new users to register an account with the application (functionality to be added later).
+*/
 
 import React from "react";
 
