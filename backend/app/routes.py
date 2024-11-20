@@ -13,6 +13,7 @@ expenses_bp = Blueprint('expenses', __name__)
 budget_bp = Blueprint('budget', __name__)
 income_bp = Blueprint('income', __name__)
 export_bp = Blueprint('export', __name__)
+settings_bp = Blueprint('settings', __name__)
 
 
 
@@ -583,3 +584,24 @@ def delete_income(income_id):
     db.session.delete(income)
     db.session.commit()
     return jsonify({'message': 'Income deleted successfully'}), 200
+
+@settings_bp.route('/notifications', methods=['POST'])
+@login_required
+def set_notifications():
+    data = request.get_json()
+    notifications = data.get('notifications', None)
+    notification_time = data.get('notification_time', None)  # Format: "HH:MM"
+
+    if notifications is None:
+        return jsonify({"error": "Notifications preference is required"}), 400
+
+    current_user.notifications = bool(notifications)
+
+    if notification_time:
+        try:
+            current_user.notification_time = time.fromisoformat(notification_time)
+        except ValueError:
+            return jsonify({"error": "Invalid time format"}), 400
+
+    db.session.commit()
+    return jsonify({"message": "Notification settings updated successfully"}), 200
