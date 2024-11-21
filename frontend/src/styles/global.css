@@ -1,0 +1,8 @@
+:root {
+  --light-grey: #EDEDEB; /* Default background color */
+  --white: #F4F5F0; /* White background */
+  --dark-grey: #4C4D4B; /* Dark background */
+  --charcoal: #333332; /* Text color */
+  --green: #5CB86E; /* Nice green for accents */
+  --font-family: Arial, sans-serif; /* Font family */
+}
