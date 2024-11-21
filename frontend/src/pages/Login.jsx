@@ -1,22 +1,17 @@
-/*
-Author: Drew Meyer
-Date: Nov 20, 2024
-File: Login.jsx
-Purpose: Handles user login functionality, including sending credentials to the backend and navigating to the Main page upon success.
-*/
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "../styles/Login.css";      // import css file
+import Logo from "../assets/black_logo.svg"  // import svg logo
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const navigate = useNavigate(); // Initialize navigate hook
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null); // Reset error message
+    setError(null);
 
     try {
       const response = await fetch("http://127.0.0.1:5000/login", {
@@ -28,21 +23,25 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message); // Login successful
-        console.log("User logged in:", data);
+        alert(data.message);
+        navigate("/main");
       } else {
-        setError(data.message); // Login failed
+        setError(data.error || "Login failed. Please try again.");
       }
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Error logging in:", err);
       setError("An error occurred. Please try again later.");
     }
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
+    <div className="login-container">
+      <div className="login-header">
+        <h1 className="app-name">Frugal</h1>
+        <img src={Logo} alt="Frugal Logo" className="login-logo" />
+      </div>
+      <form className="login-form" onSubmit={handleSubmit}>
+        <h2>Login</h2>
         <div>
           <label>Username:</label>
           <input
@@ -62,18 +61,22 @@ function Login() {
           />
         </div>
         <button type="submit">Login</button>
+        {error && <p style={{ color: "var(--dark-grey)" }}>{error}</p>}
+        <div style={{ marginTop: "1rem" }}>
+          <button
+            onClick={() => navigate("/register")}
+            className="secondary-button"
+          >
+            Register
+          </button>
+          <button
+            onClick={() => navigate("/forgot-password")}
+            className="secondary-button"
+          >
+            Forgot Password
+          </button>
+        </div>
       </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      {/* Navigation Buttons */}
-      <div style={{ marginTop: "1rem" }}>
-        <button onClick={() => navigate("/register")} style={{ marginRight: "1rem" }}>
-          Register
-        </button>
-        <button onClick={() => navigate("/forgot-password")}>
-          Forgot Password
-        </button>
-      </div>
     </div>
   );
 }
