@@ -15,29 +15,6 @@ income_bp = Blueprint('income', __name__)
 export_bp = Blueprint('export', __name__)
 settings_bp = Blueprint('settings', __name__)
 
-@settings_bp.route('/login', methods=['POST'])
-def login():
-    """
-    Authenticate a user based on username and password.
-    """
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-
-    # Validate input
-    if not username or not password:
-        return jsonify({"message": "Username and password are required"}), 400
-
-    # Query the user table for the username
-    user = User.query.filter_by(username=username).first()
-
-    if user and check_password_hash(user.password, password):
-        # Successful login
-        return jsonify({"message": "Login successful", "user_id": user.id}), 200
-    else:
-        # Invalid credentials
-        return jsonify({"message": "Invalid username or password"}), 401
-
 @export_bp.route('/export_csv', methods=['GET'])
 @login_required
 def export_csv():
