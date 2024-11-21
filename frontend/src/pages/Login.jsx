@@ -1,3 +1,10 @@
+/*
+Author: Drew Meyer
+Date: Nov 20, 2024
+File: App.jsx
+Purpose: Allows the user to login to an existing account, create a new account, or reset their password.
+*/
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";      // import css file
