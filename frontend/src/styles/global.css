@@ -6,13 +6,3 @@
   --green: #5CB86E; /* Nice green for accents */
   --font-family: Arial, sans-serif; /* Font family */
 }
-
-// NOT A PERMANENT FIX
-/* Reset default body and html spacing */
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-  background-color: var(--light-grey); /* Match the login-container background color */
-}

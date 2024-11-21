@@ -1,4 +1,14 @@
 /* Login Page Styles */
+/* Reset default body and html spacing */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: var(--light-grey); /* Match the login-container background color */
+  }
+  
+
 .login-container {
     display: flex;
     flex-direction: column; /* Stack elements vertically */
