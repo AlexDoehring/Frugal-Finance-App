@@ -54,6 +54,7 @@ example Expense posts:
 
   {
     "amount": 500,
+    "threshold": 50,
     "category": "Food",
     "description": "I want to spend less than $500 a month on Food"
   }
