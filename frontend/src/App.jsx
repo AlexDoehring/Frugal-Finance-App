@@ -7,7 +7,7 @@ Purpose: Defines the main routing structure of the application, connecting each 
 
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login"; // Import login functionality
-import Register from "./pages/Register";  // Placeholder for the new user registration page
+import Register from "./pages/Register";  // Import new user registration functionality
 import ForgotPassword from "./pages/ForgotPassword"; // Placeholder for the forgot password page
 import Main from "./pages/Main"; // Placeholder for the main page
 
