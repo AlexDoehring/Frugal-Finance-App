@@ -63,7 +63,7 @@ html, body {
     width: 100%;
     margin-top: 1rem;
     padding: 0.4rem;
-    background-color: var(--green); /* Green background for the button */
+    background-color: var(--dark-grey); /* Green background for the button */
     color: var(--white); /* White text on green background */
     border: 1px solid var(--charcoal);
     border-radius: 4px;
@@ -72,8 +72,9 @@ html, body {
   }
   
   .login-form button:hover {
-    background-color: var(--charcoal); /* Charcoal hover effect */
+    background-color: var(--green); /* Charcoal hover effect */
     color: var(--light-grey); /* Light grey text on hover */
+    border: 1px solid var(--white);
   }
   
   /* Secondary Buttons (e.g., Register, Forgot Password) */
@@ -81,7 +82,7 @@ html, body {
     width: 100%;
     margin-top: 0.5rem;
     padding: 0.5rem;
-    background-color: var(--light-grey); /* Light grey background */
+    background-color: var(--dark-grey); /* Light grey background */
     color: var(--charcoal); /* Charcoal text */
     border: none;
     border-radius: 4px;
