@@ -72,13 +72,13 @@ function Login() {
         <div style={{ marginTop: "1rem" }}>
           <button
             onClick={() => navigate("/register")}
-            className="secondary-button"
+            className="button"
           >
             Register
           </button>
           <button
             onClick={() => navigate("/forgot-password")}
-            className="secondary-button"
+            className="button"
           >
             Forgot Password
           </button>
