@@ -67,9 +67,11 @@ function Login() {
             required
           />
         </div>
+
         <button type="submit">Login</button>
         {error && <p style={{ color: "var(--dark-grey)" }}>{error}</p>}
-        <div style={{ marginTop: "1rem" }}>
+
+        <div className="button-group">
           <button
             onClick={() => navigate("/register")}
             className="button"
@@ -85,6 +87,7 @@ function Login() {
         </div>
       </form>
     </div>
+
   );
 }
 

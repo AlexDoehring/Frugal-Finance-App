@@ -77,3 +77,13 @@ html, body {
     border: 1px solid var(--charcoal);
   }
 
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .button-group button {
+    flex: 1;
+    padding: 10px;
+  }
