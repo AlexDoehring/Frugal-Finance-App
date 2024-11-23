@@ -20,6 +20,11 @@ function Register() {
     setError(null); // Reset error state
     setSuccess(null); // Reset success state
 
+    if (/\s/.test(username)) {
+      setError("Username cannot contain spaces.");
+      return;
+    }
+
     try {
       const response = await fetch("http://127.0.0.1:5000/register", {
         method: "POST",
