@@ -7,10 +7,11 @@ from .models import User, Expense, Budget
 from .db import db
 from sqlalchemy import text
 from config import Config
+from .scheduler import scheduler
 import os
 
 login_manager = LoginManager()
-mail= Mail()
+scheduler.start()
 celery=None
 
 def create_app(config_class=Config): 
@@ -22,11 +23,7 @@ def create_app(config_class=Config):
 
     # Enable CORS for all routes
     CORS(app, supports_credentials=True)
-
-    #Init flask mail and celery 
     
-    mail.init_app(app)
-
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(expenses_bp)
