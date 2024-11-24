@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from .models import Expense, User, Budget, Income
 from flask_login import login_required, current_user
+from flask_mail import Mail, Message
 from datetime import datetime, time
 from .db import db
 from io import StringIO, BytesIO
@@ -14,7 +15,6 @@ budget_bp = Blueprint('budget', __name__)
 income_bp = Blueprint('income', __name__)
 export_bp = Blueprint('export', __name__)
 settings_bp = Blueprint('settings', __name__)
-
 
 
 @export_bp.route('/export_csv', methods=['GET'])

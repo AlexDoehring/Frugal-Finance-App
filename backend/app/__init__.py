@@ -7,8 +7,6 @@ from .models import User, Expense, Budget
 from .db import db
 from sqlalchemy import text
 from config import Config
-from flask_mail import Mail, Message
-from .celery_app import make_celery
 import os
 
 login_manager = LoginManager()
@@ -28,7 +26,6 @@ def create_app(config_class=Config):
     #Init flask mail and celery 
     
     mail.init_app(app)
-    celery = make_celery(app)
 
     # Register blueprints
     app.register_blueprint(auth_bp)
@@ -39,13 +36,7 @@ def create_app(config_class=Config):
     
     with app.app_context():
         from . import models  
-        db.create_all()  
-
-    @app.route('/test-email', methods=['GET'])
-    def test_email():
-        msg = Message('Test Email', recipients=['marktmaloney@gmail.com'], body='This is a test email.')
-        mail.send(msg)
-        return "Email sent!", 200
+        db.create_all()
 
     return app
 
