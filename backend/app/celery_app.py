@@ -16,5 +16,5 @@ def make_celery(app):
             'schedule': crontab(minute='*'),  # Run every minute
         },
     }
-
+    celery.conf.timezone = 'UTC'
     return celery

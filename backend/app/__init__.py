@@ -8,7 +8,7 @@ from .db import db
 from sqlalchemy import text
 from config import Config
 from flask_mail import Mail, Message
-from celery_app import make_celery
+from .celery_app import make_celery
 import os
 
 login_manager = LoginManager()
