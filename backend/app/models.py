@@ -18,6 +18,8 @@ class User(UserMixin, db.Model):
     
     # Define the password column, which stores hashed passwords with a maximum length of 200 characters
     password = db.Column(db.String(200), nullable=False)
+    notifications = db.Column(db.Boolean, default=False)
+    notification_time = db.Column(db.Time, nullable=True)
 
 # Expense class represents an expense entry associated with a specific user
 # Inherits from db.Model for database mapping

@@ -7,11 +7,16 @@ from .models import User, Expense, Budget
 from .db import db
 from sqlalchemy import text
 from config import Config
+from flask_mail import Mail, Message
+from celery_app import make_celery
 import os
 
 login_manager = LoginManager()
+mail= Mail()
+celery=None
 
 def create_app(config_class=Config): 
+    global celery
     app = Flask(__name__)
     app.config.from_object(config_class)
     db.init_app(app)
@@ -20,16 +25,27 @@ def create_app(config_class=Config):
     # Enable CORS for all routes
     CORS(app, supports_credentials=True)
 
+    #Init flask mail and celery 
+    
+    mail.init_app(app)
+    celery = make_celery(app)
+
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(expenses_bp)
     app.register_blueprint(budget_bp)
     app.register_blueprint(income_bp)
     app.register_blueprint(export_bp)
-
+    
     with app.app_context():
         from . import models  
         db.create_all()  
+
+    @app.route('/test-email', methods=['GET'])
+    def test_email():
+        msg = Message('Test Email', recipients=['marktmaloney@gmail.com'], body='This is a test email.')
+        mail.send(msg)
+        return "Email sent!", 200
 
     return app
 

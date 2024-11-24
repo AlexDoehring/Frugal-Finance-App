@@ -8,6 +8,7 @@ import csv
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from app import celery
 
 expenses_bp = Blueprint('expenses', __name__)
 budget_bp = Blueprint('budget', __name__)
