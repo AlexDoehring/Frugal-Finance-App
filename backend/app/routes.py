@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from .models import Expense, User, Budget, Income
 from flask_login import login_required, current_user
 from flask_mail import Mail, Message
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from .db import db
 from io import StringIO, BytesIO
 import csv
@@ -191,7 +191,7 @@ def add_expense():  # Adds an expense takes no parameters
 def get_expenses():
     """
     Preconditions: User must be registered and logged in
-    Acceptable Input: Optional query parameters: category, start_date, end_date, page, per_page
+    Acceptable Input: Optional query parameters: category, start_date, end_date, time_span, page, per_page
     Postconditions: Returns a paginated list of expenses 
     Return Values: JSON with total expenses, page details, and filtered list
     Side Effects: None
@@ -201,6 +201,7 @@ def get_expenses():
     category = request.args.get('category')  
     start_date = request.args.get('start_date')  
     end_date = request.args.get('end_date')  
+    time_span = request.args.get('time_span')  # New time_span parameter
     page = request.args.get('page', 1, type=int)  # Default to page 1
     per_page = request.args.get('per_page', 10, type=int)  # Default to 10 items per page
 
@@ -213,6 +214,19 @@ def get_expenses():
         query = query.filter(Expense.date >= datetime.strptime(start_date, '%Y-%m-%d').date())
     if end_date:
         query = query.filter(Expense.date <= datetime.strptime(end_date, '%Y-%m-%d').date())
+    if time_span:
+        now = datetime.now()
+        if time_span == '1month':
+            start_date = now - timedelta(days=30)
+        elif time_span == '3months':
+            start_date = now - timedelta(days=90)
+        elif time_span == '6months':
+            start_date = now - timedelta(days=180)
+        elif time_span == '1year':
+            start_date = now - timedelta(days=365)
+        else:
+            return jsonify({"error": "Invalid time span"}), 400
+        query = query.filter(Expense.date >= start_date.date())
 
     expenses = query.paginate(page=page, per_page=per_page, error_out=False)
 
@@ -232,7 +246,6 @@ def get_expenses():
         'current_page': expenses.page,
         'expenses': result
     }), 200 # Success response with paginated results
-
 @expenses_bp.route('/expenses/<int:expense_id>', methods=['PUT'])
 @login_required
 def edit_expense(expense_id):
