@@ -64,10 +64,10 @@ def create_app(config_class=Config):
         db.create_all()
 
     # Initialize and start the scheduler
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(send_email, 'interval', minutes=1)
-    scheduler.start()
-    print("Scheduler started...")
+    # scheduler = BackgroundScheduler()
+    # scheduler.add_job(send_email, 'interval', minutes=1)
+    # scheduler.start()
+    # print("Scheduler started...")
 
     return app
 
