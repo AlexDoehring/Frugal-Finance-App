@@ -1,50 +1,51 @@
-// MAIN PAGE STYLING
-.main-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 20px;
-  }
-  
-  .form-section {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    justify-content: space-between;
-  }
-  
-  .table-section {
-    margin-top: 20px;
-  }
+/* Main container styling remains the same */
+.dashboard-container {
+  max-width: 600px;
+  margin: 4rem auto;
+  background-color: var(--white);
+  border: 1px solid var(--dark-grey);
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
 
-// COMPONENT FORM STYLING
-.expense-form,
-.revenue-form {
+.dashboard-container h1 {
+  font-family: var(--font-family), sans-serif;
+  color: var(--charcoal);
+  margin-bottom: 1rem;
+}
+
+.dashboard-container p {
+  font-family: var(--font-family), sans-serif;
+  color: var(--charcoal);
+  margin-bottom: 1.5rem;
+}
+
+/* Expenses container remains the same */
+.expenses-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin: 10px 0;
+  gap: 0.5rem; /* Reduce spacing between cards */
 }
 
-.expense-form input,
-.revenue-form input {
-  padding: 8px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+/* Smaller expense card */
+.expense-card {
+  background-color: var(--light-grey);
+  border: 1px solid var(--dark-grey);
+  border-radius: 5px; /* Smaller border radius */
+  padding: 0.5rem; /* Reduced padding for smaller size */
+  font-size: 0.9rem; /* Smaller font size */
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+  text-align: left;
+  font-family: var(--font-family), sans-serif;
 }
 
-.expense-form button,
-.revenue-form button {
-  padding: 10px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.expense-card p {
+  margin: 0.3rem 0; /* Reduced spacing between text lines */
+  color: var(--charcoal);
 }
 
-.expense-form button:hover,
-.revenue-form button:hover {
-  background-color: #45a049;
+.expense-card strong {
+  color: var(--green);
 }
