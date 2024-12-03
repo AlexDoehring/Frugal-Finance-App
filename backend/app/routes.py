@@ -132,7 +132,7 @@ def validate_input(data):
     return True, None
 
 def check_budget(budget, total_expenses):
-    print(f'budget: {budget}, total_expenses: {total_expenses}')
+    print(f'total_expenses: {total_expenses}')
     if budget and total_expenses > budget.amount:
         return 'Warning: this expense exceeds your budget for this category'
     if budget and budget.amount - total_expenses <= budget.threshold:
@@ -164,7 +164,9 @@ def add_expense():  # Adds an expense takes no parameters
         
         # Calculate total expenses for the category
         total_expenses = db.session.query(db.func.sum(Expense.amount)).filter_by(user_id=current_user.id, category=category).scalar() or 0
+        print(f'total_expenses before amount added: {total_expenses}')
         total_expenses += amount
+        print(f'total_expenses after amount added: {total_expenses}')
         
         # Get the budget for the category
         budget = Budget.query.filter_by(user_id=current_user.id, category=category).first()
@@ -208,7 +210,6 @@ def import_csv():
         stream = StringIO(file.stream.read().decode('UTF-8'))
         csv_input = csv.reader(stream)
         headers = next(csv_input)
-        total_expenses = 0
         
         for row in csv_input:
             data = dict(zip(headers, row))
@@ -221,22 +222,28 @@ def import_csv():
             date = datetime.strptime(data['date'], '%Y-%m-%d').date()
             description = data.get('description', None)
 
-            total_expenses += db.session.query(db.func.sum(Expense.amount)).filter_by(user_id=current_user.id).scalar() or 0
-
             new_expense = Expense(user_id=current_user.id, amount=amount, category=category, date=date, description=description)
             db.session.add(new_expense)
+            
+        db.session.commit() # Commit the changes to the database
 
-        # if budget and total_expenses > budget.amount:
-        #     db.session.commit()
-        #     return jsonify({'message': 'Warning: this expense exceeds your budget for this category'}), 201
-        # if budget and budget.amount - total_expenses <= budget.threshold:
-        #     db.session.commit()
-        #     return jsonify({'message': 'Warning: you are approaching your budget for this category'}), 201
-
-        db.session.commit()
+        total_expenses = 0
+        total_warnings = ''
+        for category in db.session.query(Expense.category).filter_by(user_id=current_user.id).distinct():
+            total_expenses += db.session.query(db.func.sum(Expense.amount)).filter_by(user_id=current_user.id, category=category[0]).scalar() or 0
+            budget = Budget.query.filter_by(user_id=current_user.id, category=category[0]).first()
+            warning = check_budget(budget, total_expenses)
+            if warning:
+                total_warnings += warning + '; '
+        
+        if total_warnings:
+            total_warnings = total_warnings.rstrip('; ')
+            return jsonify({'message': warning}), 201
+        
         return jsonify({'message': 'Expenses imported successfully'}), 201
 
     except Exception as e:
+        db.session.rollback() # Rollback the changes if an error occurs
         return jsonify({'error': str(e)}), 500
 
 @expenses_bp.route('/expenses', methods=['GET'])
