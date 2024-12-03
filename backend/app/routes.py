@@ -131,9 +131,16 @@ def validate_input(data):
 
     return True, None
 
+def check_budget(budget, total_expenses):
+    print(f'budget: {budget}, total_expenses: {total_expenses}')
+    if budget and total_expenses > budget.amount:
+        return 'Warning: this expense exceeds your budget for this category'
+    if budget and budget.amount - total_expenses <= budget.threshold:
+        return 'Warning: you are approaching your budget for this category'
+    return None
+
 @expenses_bp.route('/expenses', methods=['POST'])  # Route for logging expenses
 @login_required
-   
 def add_expense():  # Adds an expense takes no parameters
     """
     Preconditions: User must be registered and logged in
@@ -168,23 +175,69 @@ def add_expense():  # Adds an expense takes no parameters
         
         db.session.add(new_expense)  # Add the expense to the db
         db.session.commit()
+        
+        warning = check_budget(budget, total_expenses)
+        
+        if warning:
+            return jsonify({'message': warning}), 201
+        return jsonify({'message': 'Expense logged successfully'}), 201  # Message signaling a successful log
 
-        # Check if the total expenses exceed the budget threshold
-        if budget and total_expenses > budget.amount:
-            # Message signaling a successful log with a warning
-            return jsonify({'message': 'Warning: this expense exceeds your budget for this category'}), 201  
-        # Check if total expenses are approaching the budget threshold
-        if budget and budget.amount - total_expenses <= budget.threshold:
-            # Message signaling a successful log with a warning
-            return jsonify({'message': 'Warning: you are approaching your budget for this category'}), 201
-        return jsonify({'message': 'Expense logged successfully'}), 201  # Message signaling a successful log 
+        # # Check if the total expenses exceed the budget threshold
+        # if budget and total_expenses > budget.amount:
+        #     # Message signaling a successful log with a warning
+        #     return jsonify({'message': 'Warning: this expense exceeds your budget for this category'}), 201  
+        # # Check if total expenses are approaching the budget threshold
+        # if budget and budget.amount - total_expenses <= budget.threshold:
+        #     # Message signaling a successful log with a warning
+        #     return jsonify({'message': 'Warning: you are approaching your budget for this category'}), 201
+        # return jsonify({'message': 'Expense logged successfully'}), 201  # Message signaling a successful log 
     
     except ValueError:
         return jsonify({'error': 'Invalid data format'}), 400  # Invalid data type
     except Exception as e:
         return jsonify({'error': str(e)}), 500  # Other exceptions
-    
-    
+
+@expenses_bp.route('/expenses/csv', methods=['POST'])
+@login_required
+def import_csv():
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'error': 'CSV file is required'}), 400
+
+    try:
+        stream = StringIO(file.stream.read().decode('UTF-8'))
+        csv_input = csv.reader(stream)
+        headers = next(csv_input)
+        total_expenses = 0
+        
+        for row in csv_input:
+            data = dict(zip(headers, row))
+            is_valid, error_message = validate_input(data)
+            if not is_valid:
+                return jsonify({'error': error_message}), 400
+
+            amount = float(data['amount'])
+            category = data['category']
+            date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+            description = data.get('description', None)
+
+            total_expenses += db.session.query(db.func.sum(Expense.amount)).filter_by(user_id=current_user.id).scalar() or 0
+
+            new_expense = Expense(user_id=current_user.id, amount=amount, category=category, date=date, description=description)
+            db.session.add(new_expense)
+
+        # if budget and total_expenses > budget.amount:
+        #     db.session.commit()
+        #     return jsonify({'message': 'Warning: this expense exceeds your budget for this category'}), 201
+        # if budget and budget.amount - total_expenses <= budget.threshold:
+        #     db.session.commit()
+        #     return jsonify({'message': 'Warning: you are approaching your budget for this category'}), 201
+
+        db.session.commit()
+        return jsonify({'message': 'Expenses imported successfully'}), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @expenses_bp.route('/expenses', methods=['GET'])
 @login_required
