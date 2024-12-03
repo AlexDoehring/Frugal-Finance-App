@@ -202,7 +202,8 @@ def add_expense():  # Adds an expense takes no parameters
 @expenses_bp.route('/expenses/csv', methods=['POST'])
 @login_required
 def import_csv():
-    file = request.files.get('file')
+    file = request.files.get('file')  # Get the CSV file from the request
+    print(f'file: {file}')
     if not file:
         return jsonify({'error': 'CSV file is required'}), 400
 
