@@ -3,6 +3,7 @@ from flask_cors import CORS  # Import CORS
 from .routes import expenses_bp, budget_bp, income_bp, export_bp
 from .auth import auth_bp
 from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
 from .models import User, Expense, Budget
 from .db import db
 from sqlalchemy import text
@@ -11,14 +12,25 @@ import os
 
 login_manager = LoginManager()
 
-def create_app(config_class=Config): 
-    app = Flask(__name__)
-    app.config.from_object(config_class)
-    db.init_app(app)
-    login_manager.init_app(app) 
+def create_app():
+    """
+    Application factory function that initializes and configures the Flask app.
 
-    # Enable CORS for all routes
-    CORS(app, supports_credentials=True)
+    Returns:
+        app (Flask): The initialized Flask app.
+    """
+    app = Flask(__name__)
+
+    # Load configuration from Config class
+    app.config.from_object(Config)
+
+    # Ensure SECRET_KEY is set for session management and Flask-Login
+    if not app.config.get('SECRET_KEY'):
+        raise ValueError("SECRET_KEY is not set. Check your configuration.")
+
+    # Initialize extensions
+    db.init_app(app)  # Initialize SQLAlchemy
+    CORS(app)  # Enable Cross-Origin Resource Sharing
 
     # Register blueprints
     app.register_blueprint(auth_bp)
