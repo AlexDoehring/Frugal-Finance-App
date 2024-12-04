@@ -131,12 +131,12 @@ def validate_input(data):
 
     return True, None
 
-def check_budget(budget, total_expenses):
-    print(f'total_expenses: {total_expenses}')
+def check_budget(budget, total_expenses, category):
+    category = str(category).strip("()\',")
     if budget and total_expenses > budget.amount:
-        return 'Warning: this expense exceeds your budget for this category'
+        return f'Warning: this expense exceeds your budget for this category: {category}'
     if budget and budget.amount - total_expenses <= budget.threshold:
-        return 'Warning: you are approaching your budget for this category'
+        return f'Warning: you are approaching your budget for this category: {category}'
     return None
 
 @expenses_bp.route('/expenses', methods=['POST'])  # Route for logging expenses
@@ -178,7 +178,7 @@ def add_expense():  # Adds an expense takes no parameters
         db.session.add(new_expense)  # Add the expense to the db
         db.session.commit()
         
-        warning = check_budget(budget, total_expenses)
+        warning = check_budget(budget, total_expenses, category=category)
         
         if warning:
             return jsonify({'message': warning}), 201
@@ -202,26 +202,40 @@ def add_expense():  # Adds an expense takes no parameters
 @expenses_bp.route('/expenses/csv', methods=['POST'])
 @login_required
 def import_csv():
-    file = request.files.get('file')  # Get the CSV file from the request
-    print(f'file: {file}')
-    if not file:
-        return jsonify({'error': 'CSV file is required'}), 400
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+
+    file = request.files['file']  # Get the CSV file from the request
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    if not file or not file.filename.endswith('.csv'):
+        return jsonify({'error': 'Invalid file format. Please upload a CSV file'}), 400
 
     try:
         stream = StringIO(file.stream.read().decode('UTF-8'))
         csv_input = csv.reader(stream)
-        headers = next(csv_input)
+        headers = [header.lower() for header in next(csv_input)]
         
         for row in csv_input:
             data = dict(zip(headers, row))
+            for key in data:
+                data[key] = data[key].strip()
+                if key == 'amount':
+                    amount = float(data[key])
+                if key == 'date':
+                    if isinstance(data[key], str):
+                        data[key] = datetime.strptime(data[key], '%m/%d/%Y').date()
+                    elif isinstance(data[key], datetime):
+                        data[key] = data[key].date()
+                    date = data[key]
+                if key == 'description':
+                    description = data[key]
+                if key == 'category':
+                    category = data[key]
             is_valid, error_message = validate_input(data)
             if not is_valid:
                 return jsonify({'error': error_message}), 400
-
-            amount = float(data['amount'])
-            category = data['category']
-            date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-            description = data.get('description', None)
 
             new_expense = Expense(user_id=current_user.id, amount=amount, category=category, date=date, description=description)
             db.session.add(new_expense)
@@ -233,13 +247,13 @@ def import_csv():
         for category in db.session.query(Expense.category).filter_by(user_id=current_user.id).distinct():
             total_expenses += db.session.query(db.func.sum(Expense.amount)).filter_by(user_id=current_user.id, category=category[0]).scalar() or 0
             budget = Budget.query.filter_by(user_id=current_user.id, category=category[0]).first()
-            warning = check_budget(budget, total_expenses)
+            warning = check_budget(budget, total_expenses, category)
             if warning:
                 total_warnings += warning + '; '
-        
         if total_warnings:
             total_warnings = total_warnings.rstrip('; ')
-            return jsonify({'message': warning}), 201
+            total_warnings = total_warnings.replace('Warning: ', '')
+            return jsonify({'message': total_warnings}), 201
         
         return jsonify({'message': 'Expenses imported successfully'}), 201
 
