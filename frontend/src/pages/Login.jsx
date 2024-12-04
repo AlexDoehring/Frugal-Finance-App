@@ -31,8 +31,10 @@ function Login() {
 
       if (response.ok) {
         alert(data.message);
+        console.log("Navigating to /main...");
         navigate("/main");
       } else {
+        console.error("Login failed:", data.error);
         setError(data.error || "Login failed. Please try again.");
       }
     } catch (err) {
