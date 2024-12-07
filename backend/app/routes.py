@@ -15,8 +15,6 @@ income_bp = Blueprint('income', __name__)
 export_bp = Blueprint('export', __name__)
 settings_bp = Blueprint('settings', __name__)
 
-
-
 @export_bp.route('/export_csv', methods=['GET'])
 @login_required
 def export_csv():

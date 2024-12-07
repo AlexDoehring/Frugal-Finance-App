@@ -1,9 +1,14 @@
 # Import necessary modules and functions for authentication routes
-from flask import Blueprint, request, jsonify  # Blueprint for grouping routes, request for handling HTTP requests, jsonify for JSON responses
+from flask import Blueprint, request, jsonify, make_response  # Blueprint for grouping routes, request for handling HTTP requests, jsonify for JSON responses
 from flask_login import login_user, logout_user, login_required  # Functions for managing user login sessions
 from .models import User  # Import the User model from models for database operations
 from werkzeug.security import check_password_hash, generate_password_hash  # Security functions for password hashing and checking
 from .db import db  # Import the database instance for database transactions
+import datetime  # Used when creating cookies
+import jwt  # JSON web token libarary
+from config import Config  # Import config class object from config module
+
+SECRETKEY = Config.SECRET_KEY
 
 # Creates a blueprint for authentication routes, grouping all related routes under 'auth'
 auth_bp = Blueprint('auth', __name__)  
@@ -54,11 +59,45 @@ def login():
 
     # If user exists and the password matches the stored hash, log them in
     if user and check_password_hash(user.password, password):
-        login_user(user)  # Log in the user
-        return jsonify({'message': 'Login successful'}), 200  # Return success message
+        # Generate a JWT token
+        token = jwt.encode(
+            {
+                'user_id': user.id,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # Token expiration
+            },
+            SECRETKEY,
+            algorithm='HS256'
+        )
+
+        # Create a response and set the cookie
+        response = make_response(jsonify({'message': 'Login successful'}))
+        response.set_cookie(
+            'authToken',
+            token, 
+            httponly=True,  # Prevent JavaScript access
+            secure=True,  # Only send cookies over HTTPS
+            samesite='Strict'  # Prevent cross-site requests
+        )
+
+        return response
+
     else:
         # Return error message if credentials are invalid
         return jsonify({'error': 'Invalid credentials'}), 401
+
+@auth_bp.route('/auth/verify', methods=['GET'])
+def verify_auth():
+    token = request.cookies.get('authToken')
+    if not token:
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        return jsonify({'message': 'Authenticated'})
+    except jwt.ExpiredSignatureError:
+        return jsonify({'error': 'Token expired'}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({'error': 'Invalid token'}), 401
+
 
 # Route for user logout
 # Logs out the current user if they are logged in

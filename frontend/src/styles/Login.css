@@ -1,0 +1,89 @@
+/* Login Page Styles */
+/* Reset default body and html spacing */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: var(--light-grey); /* Match the login-container background color */
+  }
+  
+
+.login-container {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    background-color: var(--light-grey); /* Default background color from global.css */
+  }
+  
+  .login-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem; /* Space between header and form */
+  }
+  
+  .login-logo {
+    width: 40px; /* Adjust size of logo */
+    height: auto; /* Maintain aspect ratio */
+  }
+  
+  .app-name {
+    font-family: var(--font-family); /* Global font family */
+    font-size: 2.5rem; /* Adjust font size */
+    color: var(--charcoal); /* Green color for the app name */
+  }
+  
+  /* Login Form Styles */
+  .login-form {
+    background: var(--light-grey); /* Light grey background from global.css */
+    border: 1px solid var(--charcoal);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+    width: 400px; /* Adjust width as needed */
+    text-align: center;
+    font-family: var(--font-family); /* Use global font-family */
+    color: var(--charcoal); /* Text color from global.css */
+  }
+  
+  .login-form input {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+    padding: 0.2rem;
+    border: 1px solid var(--charcoal); /* Border using charcoal */
+    border-radius: 5px;
+    font-family: var(--font-family); /* Ensure consistent font-family */
+  }
+  
+  .login-form button {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.4rem;
+    background-color: var(--green); /* Green background for the button */
+    color: var(--white); /* White text on green background */
+    border: 1px solid var(--charcoal);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-family); /* Consistent font-family */
+  }
+  
+  .login-form button:hover {
+    background-color: var(--dark-grey);
+    color: var(--light-grey);
+    border: 1px solid var(--charcoal);
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .button-group button {
+    flex: 1;
+    padding: 10px;
+  }

@@ -1,0 +1,20 @@
+{
+  "name": "frugal-finance-app",
+  "version": "1.0.0",
+  "description": "Frugal is a full stack web application designed to track expenses and allow users to view and evaluate their spending habits.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^5.4.11"
+  }
+}
