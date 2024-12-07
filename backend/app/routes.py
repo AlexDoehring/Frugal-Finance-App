@@ -673,6 +673,75 @@ def delete_income(income_id):
     db.session.commit()
     return jsonify({'message': 'Income deleted successfully'}), 200
 
+
+@expenses_bp.route('/net_earnings', methods=['GET'])
+@login_required
+def get_net_earnings():
+    """
+    Preconditions: User must be registered and logged in
+    Acceptable Input: 
+        Query parameter 'time_span' with values 'day', 'month', 'year', or 'all'.
+        Query parameter 'date' with format 'YYYY-MM-DD' for 'day' time span, 'YYYY-MM' for 'month' time span, 
+        'YYYY' for 'year' time span, and no date for 'all' time span.
+    Postconditions: Returns the net earnings for the current user.
+    """
+    
+    data = request.get_json()
+    time_span = data.get('time_span')
+    date_input = data.get('date')
+    
+    try:
+        if time_span == 'day':
+            if not date_input:
+                return jsonify({"error": "Date is required for 'day' time span"}), 400
+            start_date = datetime.strptime(date_input, '%Y-%m-%d').date()
+        elif time_span == 'month':
+            if not date_input:
+                return jsonify({"error": "Month and year are required for 'month' time span"}), 400
+            start_date = datetime.strptime(date_input, '%Y-%m').date().replace(day=1)
+        elif time_span == 'year':
+            if not date_input:
+                return jsonify({"error": "Year is required for 'year' time span"}), 400
+            start_date = datetime.strptime(date_input, '%Y').date().replace(month=1, day=1)
+        elif time_span == 'all':
+            start_date = None
+        else:
+            return jsonify({"error": "Invalid time span"}), 400
+
+        # Query total income for the current user
+        income_query = db.session.query(db.func.sum(Income.amount)).filter_by(user_id=current_user.id)
+        total_income = income_query.scalar() or 0
+        
+        # Query total expenses for the current user
+        if start_date:
+            if time_span == 'day':
+                expense_query = Expense.query.filter_by(user_id=current_user.id, date=start_date)
+            elif time_span == 'month':
+                end_date = start_date.replace(day=1, month=start_date.month + 1) - timedelta(days=1)
+                expense_query = Expense.query.filter_by(user_id=current_user.id).filter(Expense.date >= start_date, Expense.date <= end_date)
+            elif time_span == 'year':
+                end_date = start_date.replace(day=31, month=12)
+                expense_query = Expense.query.filter_by(user_id=current_user.id).filter(Expense.date >= start_date, Expense.date <= end_date)
+            else:
+                expense_query = Expense.query.filter_by(user_id=current_user.id)
+        else:
+            expense_query = Expense.query.filter_by(user_id=current_user.id)
+            
+        total_expenses = db.session.query(db.func.sum(expense_query.subquery().c.amount)).scalar() or 0
+        
+        # Calculate net earnings
+        net_earnings = total_income - total_expenses
+        
+        # Return the result as JSON
+        return jsonify({
+            'total_income': total_income,
+            'total_expenses': total_expenses,
+            'net_earnings': net_earnings
+        }), 200  # Success response with net earnings
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500  # Internal server error
+
 @settings_bp.route('/notifications', methods=['POST'])
 @login_required
 def set_notifications():

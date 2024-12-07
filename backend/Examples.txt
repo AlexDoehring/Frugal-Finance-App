@@ -79,3 +79,10 @@ example income posts
   "frequency": "monthly",
   "description": "Monthly returns from investments"
 }
+
+example net_earnings post:
+
+{
+  "time_span" : "day",
+  "date" : "2024-10-10"
+}
