@@ -66,12 +66,15 @@ function Main() {
 
   const handleLogout = async () => {
     try {
-      // Optional: Call a logout endpoint if you have one
       await axios.post("/auth/logout", {}, { withCredentials: true });
+      console.log("User logged out successfully");
     } catch (error) {
-      console.error("Logout failed:", error.response?.data || error.message);
+      if (error.response && error.response.status === 404) {
+        console.log("User logged out successfully");
+      } else {
+        console.error("Logout error:", error.response?.data || error.message);
+      }
     } finally {
-      // Redirect to login page
       navigate("/login");
     }
   };
