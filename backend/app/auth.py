@@ -7,6 +7,7 @@ from .db import db  # Import the database instance for database transactions
 import datetime  # Used when creating cookies
 import jwt  # JSON web token libarary
 from config import Config  # Import config class object from config module
+import datetime
 
 SECRETKEY = Config.SECRET_KEY
 
@@ -60,23 +61,26 @@ def login():
     # If user exists and the password matches the stored hash, log them in
     if user and check_password_hash(user.password, password):
         # Generate a JWT token
-        token = jwt.encode(
-            {
-                'user_id': user.id,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # Token expiration
-            },
-            SECRETKEY,
-            algorithm='HS256'
-        )
+        try:
+            token = jwt.encode(
+                {
+                    'user_id': user.id,
+                    'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+                },
+                SECRETKEY,
+                algorithm='HS256'
+            )
+        except Exception as e:
+            return jsonify({'error': 'Failed to generate token', 'details': str(e)}), 500
 
         # Create a response and set the cookie
         response = make_response(jsonify({'message': 'Login successful'}))
         response.set_cookie(
             'authToken',
-            token, 
-            httponly=True,  # Prevent JavaScript access
-            secure=True,  # Only send cookies over HTTPS
-            samesite='Strict'  # Prevent cross-site requests
+            token,
+            httponly=True,
+            secure=False,  # Use HTTPS in production
+            samesite='None'  # Allow cross-origin requests
         )
 
         return response

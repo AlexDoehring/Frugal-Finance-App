@@ -23,13 +23,11 @@ function Main() {
     const verifyAuth = async () => {
       try {
         const response = await axios.get("/auth/verify", { withCredentials: true });
-        if (response.status === 200) {
-          setAuthenticated(true);
-          fetchExpenses();
-        }
+        setAuthenticated(true);
+        fetchExpenses();
       } catch (error) {
         console.error("Authentication failed:", error.response?.data || error.message);
-        setAuthenticated(false);
+        alert("Session expired or invalid credentials. Please log in again.");
         navigate("/login");
       } finally {
         setLoading(false);

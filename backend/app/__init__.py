@@ -30,7 +30,9 @@ def create_app():
 
     # Initialize extensions
     db.init_app(app)  # Initialize SQLAlchemy
-    CORS(app)  # Enable Cross-Origin Resource Sharing
+    login_manager.init_app(app)  # Initialize Flask-Login
+    login_manager.login_view = "auth.login"  # Set the login view
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:5173"], "supports_credentials": True}})
 
     # Register blueprints
     app.register_blueprint(auth_bp)
@@ -56,7 +58,18 @@ def init_db(db, app):
                     db.session.execute(text(statement.strip())) 
         db.session.commit()
 
-@login_manager.user_loader
-def load_user(user_id):
-    from .models import User  
-    return User.query.get(int(user_id))
+@login_manager.request_loader
+def load_user_from_request(request):
+    # Extract the token from cookies
+    token = request.cookies.get('authToken')
+    if token:
+        try:
+            # Decode the token and get the user_id
+            data = jwt.decode(token, SECRETKEY, algorithms=['HS256'])
+            user_id = data.get('user_id')
+            return User.query.get(user_id)  # Replace with your database lookup
+        except jwt.ExpiredSignatureError:
+            print("Token expired")
+        except jwt.InvalidTokenError:
+            print("Invalid token")
+    return None
