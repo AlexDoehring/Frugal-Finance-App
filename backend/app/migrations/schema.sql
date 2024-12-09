@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS expense (
     category VARCHAR(50) NOT NULL,
     date DATE NOT NULL,
     description VARCHAR(255), --optional
+    is_recurring BOOLEAN DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
