@@ -30,11 +30,11 @@ def export_csv():
     writer = csv.writer(output)
     
     # Write headers
-    writer.writerow(['Type', 'ID', 'Amount', 'Category', 'Description', 'Date/Source/Frequency'])
+    writer.writerow(['Type', 'ID', 'Amount', 'Category', 'Description', 'Frequency', 'Date'])
     
     # Write expenses
     for expense in expenses:
-        writer.writerow(['Expense', expense.id, expense.amount, expense.category, expense.description, expense.date])
+        writer.writerow(['Expense', expense.id, expense.amount, expense.category, expense.description, expense.is_recurring, expense.date])
     
     # Write incomes
     for income in incomes:
@@ -63,11 +63,11 @@ def export_pdf():
     writer = csv.writer(output)
     
     # Write headers
-    writer.writerow(['Type', 'ID', 'Amount', 'Category', 'Description', 'Date/Source/Frequency'])
+    writer.writerow(['Type', 'ID', 'Amount', 'Category', 'Description', 'Frequency', 'Date'])
     
     # Write expenses
     for expense in expenses:
-        writer.writerow(['Expense', expense.id, expense.amount, expense.category, expense.description, expense.date])
+        writer.writerow(['Expense', expense.id, expense.amount, expense.category, expense.description, expense.is_recurring, expense.date])
     
     # Write incomes
     for income in incomes:
@@ -161,19 +161,19 @@ def add_expense():  # Adds an expense takes no parameters
         category = data['category']
         date = datetime.strptime(data['date'], '%Y-%m-%d').date()
         description = data.get('description', None)
+        is_recurring = data.get('is_recurring', False)
+        recurring_frequency = data.get('recurring_frequency', None)
         
         # Calculate total expenses for the category
         total_expenses = db.session.query(db.func.sum(Expense.amount)).filter_by(user_id=current_user.id, category=category).scalar() or 0
-        print(f'total_expenses before amount added: {total_expenses}')
         total_expenses += amount
-        print(f'total_expenses after amount added: {total_expenses}')
         
         # Get the budget for the category
         budget = Budget.query.filter_by(user_id=current_user.id, category=category).first()
         
         
         # Creates the new expense
-        new_expense = Expense(user_id=current_user.id, amount=amount, category=category, date=date, description=description)
+        new_expense = Expense(user_id=current_user.id, amount=amount, category=category, date=date, description=description, is_recurring=is_recurring, recurring_frequency=recurring_frequency)
         
         db.session.add(new_expense)  # Add the expense to the db
         db.session.commit()
@@ -233,11 +233,15 @@ def import_csv():
                     description = data[key]
                 if key == 'category':
                     category = data[key]
+                if key == 'is_recurring':
+                    is_recurring = data[key].lower() == 'true'
+                if key == 'recurring_frequency':
+                    recurring_frequency = data[key]
             is_valid, error_message = validate_input(data)
             if not is_valid:
                 return jsonify({'error': error_message}), 400
 
-            new_expense = Expense(user_id=current_user.id, amount=amount, category=category, date=date, description=description)
+            new_expense = Expense(user_id=current_user.id, amount=amount, category=category, date=date, description=description or None, is_recurring=is_recurring or False, recurring_frequency=recurring_frequency or None)     
             db.session.add(new_expense)
             
         db.session.commit() # Commit the changes to the database
@@ -311,7 +315,9 @@ def get_expenses():
             'amount': expense.amount,
             'category': expense.category,
             'date': expense.date.strftime('%Y-%m-%d'),
-            'description': expense.description
+            'description': expense.description,
+            'is_recurring': expense.is_recurring,
+            'recurring_frequency': expense.recurring_frequency
         } for expense in expenses.items
     ]
 
@@ -356,6 +362,12 @@ def edit_expense(expense_id):
     
     if 'description' in data:
         expense.description = data['description']
+        
+    if 'is_recurring' in data:
+        expense.is_recurring = data['is_recurring']
+        
+    if 'recurring_frequency' in data:
+        expense.recurring_frequency = data['recurring_frequency']
 
     # Commit the changes to the database
     db.session.commit()

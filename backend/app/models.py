@@ -44,6 +44,8 @@ class Expense(db.Model):
     description = db.Column(db.String(200), nullable=True)
     
     is_recurring = db.Column(db.Boolean, default=False)
+    
+    recurring_frequency = db.Column(db.String(50), nullable=True)
 
 class Budget(db.Model):
     id = db.Column(db.Integer, primary_key=True)

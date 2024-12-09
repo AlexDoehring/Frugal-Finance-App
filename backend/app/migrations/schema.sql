@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS expense (
     date DATE NOT NULL,
     description VARCHAR(255), --optional
     is_recurring BOOLEAN DEFAULT 0,
+    recurring_frequency VARCHAR(50) DEFAULT NULL, -- e.g., "monthly", "weekly"
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
