@@ -6,6 +6,7 @@ Purpose: Displays a page for users to create a new account and integrates with t
 */
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import "../styles/Register.css"; // Import the CSS file
 
 function Register() {
@@ -14,6 +15,8 @@ function Register() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
+  const navigate = useNavigate(); // Initialize navigate function
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,10 +38,15 @@ function Register() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess("User registered successfully!"); // Display success message
+        setSuccess("User registered successfully!");
         setUsername(""); // Clear form inputs
         setEmail("");
         setPassword("");
+
+        // Redirect to login page after 2 seconds
+        setTimeout(() => {
+          navigate("/login"); // Redirect to login
+        }, 2000);
       } else {
         setError(data.error || "Failed to register user."); // Display error message
       }
