@@ -39,6 +39,11 @@ def send_email():
             server.starttls()
             server.login(sender_email, password)
             server.sendmail(sender_email, receiver_email, message.as_string())
+            recurring_expenses = Expense.query.filter_by(is_recurring=True).all()
+            for expense in recurring_expenses:
+                new_expense = Expense(user_id=expense.user_id, amount=expense.amount, description=expense.description, category=expense.category, date=expense.date, is_recurring=expense.is_recurring)
+                db.session.add(new_expense)
+                db.session.commit()
         print(f"Test email sent successfully to {receiver_email}!")
     except Exception as e:
         print(f"Failed to send email to {receiver_email}: {e}")
@@ -85,4 +90,5 @@ def init_db(db, app):
 @login_manager.user_loader
 def load_user(user_id):
     from .models import User
+    from .models import Expense
     return User.query.get(int(user_id))
