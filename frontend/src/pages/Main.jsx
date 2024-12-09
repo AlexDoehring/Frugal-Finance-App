@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Main.css";
+import "../styles/global.css"
 import axios from "axios";
 import { Table, DataType } from "ka-table";
 import "ka-table/style.css";
@@ -23,11 +24,13 @@ function Main() {
     const verifyAuth = async () => {
       try {
         const response = await axios.get("/auth/verify", { withCredentials: true });
-        setAuthenticated(true);
-        fetchExpenses();
+        if (response.status === 200) {
+          setAuthenticated(true);
+          fetchExpenses();
+        }
       } catch (error) {
         console.error("Authentication failed:", error.response?.data || error.message);
-        alert("Session expired or invalid credentials. Please log in again.");
+        setAuthenticated(false);
         navigate("/login");
       } finally {
         setLoading(false);
@@ -60,7 +63,18 @@ function Main() {
       alert(error.response?.data?.error || "An error occurred while adding the expense.");
     }
   };
-  
+
+  const handleLogout = async () => {
+    try {
+      // Optional: Call a logout endpoint if you have one
+      await axios.post("/auth/logout", {}, { withCredentials: true });
+    } catch (error) {
+      console.error("Logout failed:", error.response?.data || error.message);
+    } finally {
+      // Redirect to login page
+      navigate("/login");
+    }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -91,7 +105,12 @@ function Main() {
 
     return (
       <div className="dashboard-container">
-        <h1>Welcome to Frugal Finance</h1>
+        <header className="dashboard-header">
+          <h1>Welcome to Frugal Finance</h1>
+          <button className="logout-button" onClick={handleLogout}>
+            Logout
+          </button>
+        </header>
         <p>This is your dashboard. Here’s your expense overview:</p>
         <button onClick={() => setShowModal(true)}>Add Expense</button>
         <Table {...tableProps} />
